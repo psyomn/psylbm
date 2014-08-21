@@ -1,0 +1,13 @@
+PSYLIGHTBOOKMARK
+
+  This is a very small application that aims to be a light server, with a tiny
+  protocol, that aims to store bookmarks of various media, be it books, manga,
+  comics, whatever.
+  
+  The protocol will be provided, and whoever wants to use this tiny server can
+  implement something in their own application. If you're interested, see the
+  file PROTOCOL.
+
+AUTHORS
+
+  Simon (psyomn) Symeonidis (2014)
