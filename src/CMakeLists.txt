@@ -30,6 +30,7 @@ set(EXECUTABLE_NAME "psy-lightbookmarkd")
 add_executable(${EXECUTABLE_NAME} 
 main.c
 server.c
+message_handler.c
 )
 
 target_link_libraries(${EXECUTABLE_NAME} ${CMAKE_THREAD_LIBS_INIT})

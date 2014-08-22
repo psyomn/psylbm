@@ -1,11 +1,12 @@
 #include "server.h"
+#include "message_handler.h"
 #include "common.h"
 
 static psy_lbm_status_strings_t psy_lbm_statuses[] = {
   {PSYLBM_STARTED,   "started"},
   {PSYLBM_LISTENING, "listening"}, 
   {PSYLBM_PAUSED,    "paused"},
-  {PSYLBM_STOPPED,   "stopped"},
+  {PSYLBM_SHUTDOWN,  "shutting down"},
   {PSYLBM_PANIC,     "panic"}
 };
 
@@ -32,6 +33,8 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
     return;
   }
 
+  printf("[ok]\n");
+
   const int buffsize = 2048;
   char buffer[buffsize];
   int recvlen;
@@ -50,13 +53,20 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
     return;
   }
 
-  while (1) {
+  while (_server->status != PSYLBM_SHUTDOWN) {
     recvlen = recvfrom(
       fd, buffer, buffsize, 0,
       (struct sockaddr*)&remote_address, &address_length);
 
-    perror("problemz");
+    if (recvlen == -1) {
+      perror("Problem receiving");
+      continue;
+    }
+
     printf("Received %d bytes\n", recvlen);
+    printf("[%s]\n", buffer);
+    psy_lbm_handle_message(buffer);
+    memset((void*) buffer, 0, sizeof(buffer));
   }
 
   _server->status = PSYLBM_LISTENING;

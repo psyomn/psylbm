@@ -3,6 +3,9 @@ PSYLIGHTBOOKMARK
   This is a very small application that aims to be a light server, with a tiny
   protocol, that aims to store bookmarks of various media, be it books, manga,
   comics, whatever.
+
+  Don't treat the software as secure. This was coded for fun, and maybe aspects
+  of security might have been neglected. 
   
   The protocol will be provided, and whoever wants to use this tiny server can
   implement something in their own application. If you're interested, see the

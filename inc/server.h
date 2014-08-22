@@ -6,7 +6,7 @@
 #define PSYLBM_STARTED   1
 #define PSYLBM_LISTENING 2
 #define PSYLBM_PAUSED    3 
-#define PSYLBM_STOPPED   4
+#define PSYLBM_SHUTDOWN  4
 #define PSYLBM_PANIC    -1
 
 struct psy_lbm_status_strings {
