@@ -5,7 +5,7 @@ else ()
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lpthread -g -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lsqlite3 -lpthread -g -Wall")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
@@ -31,6 +31,7 @@ add_executable(${EXECUTABLE_NAME}
 main.c
 server.c
 message_handler.c
+db_handler.c
 )
 
-target_link_libraries(${EXECUTABLE_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${EXECUTABLE_NAME} "${CMAKE_THREAD_LIBS_INIT}")

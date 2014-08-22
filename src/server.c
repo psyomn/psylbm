@@ -1,6 +1,9 @@
 #include "server.h"
 #include "message_handler.h"
+#include "db_handler.h"
 #include "common.h"
+
+#include <sqlite3.h>
 
 static psy_lbm_status_strings_t psy_lbm_statuses[] = {
   {PSYLBM_STARTED,   "started"},
@@ -51,6 +54,11 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
   if (bind(fd, (struct sockaddr*)&server_sock, sizeof(server_sock)) < 0) {
     perror("Bind failed");
     return;
+  }
+
+  if (sqlite3_open(PSYLBM_DB_NAME, &_server->db) != SQLITE_OK) {
+    perror("Problem opening db");
+    exit(0);
   }
 
   while (_server->status != PSYLBM_SHUTDOWN) {

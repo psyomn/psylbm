@@ -7,6 +7,11 @@ PSYLIGHTBOOKMARK PROTOCOL
 
   The protocol is plaintext. Fields are delimited by the pipe '|' symbol.
 
+REGISTRATION
+
+  Registration request:
+    <reg>|<username>|<password>
+
 AUTHENTICATION
 
   Login request:
@@ -19,7 +24,7 @@ AUTHENTICATION
 INSERT
   
   Insert request:
-    <ins>|<book-title>|<volume>|<chapter>|<page>
+    <ins>|<book-title>|<volume>|<chapter>|<page>|<token>
   Insert response (success):
     <ins>|<ok>
   Insert response (failure):

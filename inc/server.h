@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <stdint.h>
+#include <sqlite3.h>
 
 #define PSYLBM_STARTED   1
 #define PSYLBM_LISTENING 2
@@ -20,6 +21,7 @@ struct psy_lbm_server {
   uint16_t portnum;
   char*    hostname;
   int      status;
+  sqlite3* db;
 };
 
 typedef struct psy_lbm_server psy_lbm_server_t;
