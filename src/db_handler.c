@@ -7,7 +7,7 @@
 /* Check if db exists - create if not */
 void
 psy_lbm_check_db() {
-  int fd; 
+  FILE* fd; 
 
   fd = fopen(PSYLBM_DB_NAME, "r");
 
@@ -56,7 +56,33 @@ psy_lbm_find_user(sqlite3* _db, uint32_t _id) {
 
 user_t*
 psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
+  user_t* u = NULL;
+  u = malloc(sizeof(user_t));
 
+  return u;
 }
 
+void
+psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
+
+  sqlite3_prepare_v2(_db, SQL_INSERT_USER, 
+    sizeof(SQL_INSERT_USER), &stmt, t);
+
+  sqlite3_bind_text(stmt, 1, _username, strlen(_username), SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 2, _password, strlen(_password), SQLITE_TRANSIENT);
+
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    perror("Problem inserting row");
+  }
+}
+
+void
+psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
+  uint32_t volume, uint32_t chapter, uint32_t page) {
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
+
+}
 

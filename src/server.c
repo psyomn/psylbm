@@ -62,6 +62,7 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
   }
 
   while (_server->status != PSYLBM_SHUTDOWN) {
+    _server->status = PSYLBM_LISTENING;
     recvlen = recvfrom(
       fd, buffer, buffsize, 0,
       (struct sockaddr*)&remote_address, &address_length);
@@ -71,13 +72,14 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
       continue;
     }
 
+    psy_lbm_insert_user(_server->db, "testuser", "testpassword");
+
     printf("Received %d bytes\n", recvlen);
     printf("[%s]\n", buffer);
     psy_lbm_handle_message(buffer);
     memset((void*) buffer, 0, sizeof(buffer));
   }
 
-  _server->status = PSYLBM_LISTENING;
   printf("[ok]\n");
 }
 
