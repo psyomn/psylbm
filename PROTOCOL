@@ -9,12 +9,16 @@ PSYLIGHTBOOKMARK PROTOCOL
 
 REGISTRATION
 
+  <username> ::= [:alpha:]+[:alphanum:]+
+
   Registration request:
     <reg>|<username>|<password>
   Registration response (success):
     <regok>
   Registration response (failure):
     <username-taken>
+  Registration response (failure):
+    <bad-username>
 
 AUTHENTICATION
 
