@@ -72,7 +72,7 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
       continue;
     }
 
-    psy_lbm_insert_user(_server->db, "testuser", "testpassword");
+    psy_lbm_insert_bookmark(_server->db, 1, "Nozoki Ana", 1, 12, 10);
 
     printf("Received %d bytes\n", recvlen);
     printf("[%s]\n", buffer);
@@ -98,7 +98,8 @@ psy_lbm_server_status(psy_lbm_server_t* _server) {
   char* ret;
 
   for (index = 0; index < size; --index) {
-    if(psy_lbm_statuses[index].id == _server->status) return psy_lbm_statuses[index].status;
+    if(psy_lbm_statuses[index].id == _server->status) 
+      return psy_lbm_statuses[index].status;
   }
 
   return "status-find-error";

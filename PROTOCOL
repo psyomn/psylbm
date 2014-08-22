@@ -11,6 +11,10 @@ REGISTRATION
 
   Registration request:
     <reg>|<username>|<password>
+  Registration response (success):
+    <regok>
+  Registration response (failure):
+    <username-taken>
 
 AUTHENTICATION
 
@@ -22,10 +26,19 @@ AUTHENTICATION
     <fail>
 
 INSERT
+
+  <bookmark> ::= <book-title>|<volume>|<chapter>|<page>
   
   Insert request:
-    <ins>|<book-title>|<volume>|<chapter>|<page>|<token>
+    <ins>|<bookmark>|<token>
   Insert response (success):
     <ins>|<ok>
   Insert response (failure):
     <ins>|<fail>
+
+SYNCHRONIZATION
+
+  Sync request:
+    <sync>|<token>
+  Sync response: 
+    [<bookmark>]*

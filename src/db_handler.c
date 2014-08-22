@@ -68,7 +68,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   const char** t = NULL;
 
   sqlite3_prepare_v2(_db, SQL_INSERT_USER, 
-    sizeof(SQL_INSERT_USER), &stmt, t);
+                     sizeof(SQL_INSERT_USER), &stmt, t);
 
   sqlite3_bind_text(stmt, 1, _username, strlen(_username), SQLITE_TRANSIENT);
   sqlite3_bind_text(stmt, 2, _password, strlen(_password), SQLITE_TRANSIENT);
@@ -80,9 +80,21 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
 
 void
 psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
-  uint32_t volume, uint32_t chapter, uint32_t page) {
+  uint32_t _volume, uint32_t _chapter, uint32_t _page) {
   sqlite3_stmt* stmt = NULL;
   const char** t = NULL;
+  
+  sqlite3_prepare_v2(_db, SQL_INSERT_BOOKMARK,
+                     sizeof(SQL_INSERT_BOOKMARK), &stmt, t);
 
+  sqlite3_bind_int(stmt, 1, _user_id);
+  sqlite3_bind_text(stmt, 2, _title, strlen(_title), SQLITE_TRANSIENT);
+  sqlite3_bind_int(stmt, 3, _volume);
+  sqlite3_bind_int(stmt, 4, _chapter);
+  sqlite3_bind_int(stmt, 5, _page);
+
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    perror("Problem inserting bookmark");
+  }
 }
 
