@@ -6,7 +6,9 @@
 /* Domain structures that are representations of tha table schemass */ 
 
 struct user {
+  uint32_t id;
   char* name;
+  char* password;
 };
 typedef struct user user_t;
 

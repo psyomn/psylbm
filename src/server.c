@@ -73,6 +73,7 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
     }
 
     psy_lbm_insert_bookmark(_server->db, 1, "Nozoki Ana", 1, 12, 10);
+    psy_lbm_insert_user(_server->db, "user", "password");
 
     printf("Received %d bytes\n", recvlen);
     printf("[%s]\n", buffer);
@@ -104,3 +105,4 @@ psy_lbm_server_status(psy_lbm_server_t* _server) {
 
   return "status-find-error";
 }
+

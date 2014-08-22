@@ -25,5 +25,8 @@ void
 psy_lbm_insert_bookmark(sqlite3*, uint32_t, char*, 
   uint32_t, uint32_t, uint32_t);
 
+void
+_psy_lbm_make_api_token_row(sqlite3*, uint32_t);
+
 #endif
 

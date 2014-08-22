@@ -3,42 +3,45 @@
 
 /* Table creation sql */
 #define SQL_CREATE_USERS \
-  "create table users("\
-    "id integer primary key autoincrement, "\
-    "username text unique, password text);"
+  "CREATE TABLE users("\
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, "\
+    "username TEXT UNIQUE, password TEXT);"
 
 #define SQL_CREATE_BOOKMARKS \
   "create table bookmarks("\
-     "id integer primary key autoincrement, "\
-     "user_id integer,"\
-     "title text,"\
-     "volume integer,"\
-     "chapter integer,"\
-     "page integer);"\
+     "id INTEGER PRIMARY KEY AUTOINCREMENT, "\
+     "user_id INTEGER,"\
+     "title TEXT,"\
+     "volume INTEGER,"\
+     "chapter INTEGER,"\
+     "page INTEGER);"\
 
 #define SQL_CREATE_API_TOKENS \
-  "create table api_tokens("\
-    "user_id integer,"\
-    "assigned_token text);"
+  "CREATE TABLE api_tokens("\
+    "user_id INTEGER,"\
+    "token TEXT);"
 
 /* Inserts */
 #define SQL_INSERT_USER \
-  "insert into users (username, password) "\
-  "values (?, ?);"
+  "INSERT INTO users (username, password) "\
+  "VALUES (?,?);"
+
+#define SQL_INSERT_API \
+  "INSERT INTO api_tokens (user_id, token) VALUES (?,?)"
 
 #define SQL_INSERT_BOOKMARK \
-  "insert into bookmarks (user_id,title,volume,chapter,page)"\
-  " values (?,?,?,?,?);"
+  "INSERT INTO bookmarks (user_id,title,volume,chapter,page)"\
+  " VALUES (?,?,?,?,?);"
  
+/* Find */
 #define SQL_FIND_USER_BY_ID \
-  "select from users where users.user_id = ?"
+  "SELECT FROM users WHERE id = ?;"
 
 #define SQL_FIND_USER_BY_NAME \
-  "select from users where users.name = ?"
+  "SELECT FROM users WHERE username = 'jon';"
 
 #define SQL_FIND_BOOKMARKS_BY_USER_ID \
-  "select from bookmarks where bookmarks.user_id = ?"
-  
+  "SELECT FROM bookmarks WHERE user_id = ?;"
 
 #endif
 
