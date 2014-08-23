@@ -5,7 +5,7 @@ else ()
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lsqlite3 -lpthread -g -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
@@ -36,4 +36,6 @@ db_handler.c
 domain.c
 )
 
-target_link_libraries(${EXECUTABLE_NAME} "${CMAKE_THREAD_LIBS_INIT}")
+target_link_libraries(${EXECUTABLE_NAME} "${CMAKE_THREAD_LIBS_INIT}"
+sqlite3 ssl crypto pthread
+)
