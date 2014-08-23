@@ -35,13 +35,13 @@
  
 /* Find */
 #define SQL_FIND_USER_BY_ID \
-  "SELECT FROM users WHERE id = ?;"
+  "SELECT * FROM users WHERE id = ?;"
 
 #define SQL_FIND_USER_BY_NAME \
-  "SELECT FROM users WHERE username = 'jon';"
+  "SELECT * FROM users WHERE username = 'jon';"
 
 #define SQL_FIND_BOOKMARKS_BY_USER_ID \
-  "SELECT FROM bookmarks WHERE user_id = ?;"
+  "SELECT * FROM bookmarks WHERE user_id = ?;"
 
 #endif
 
