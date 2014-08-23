@@ -19,14 +19,14 @@ set(myproject_VERSION_MINOR 0)
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-set(CMAKE_MODULE_PATH "${psy-lightbookmark_SOURCE_DIR}/modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${psylbm_SOURCE_DIR}/modules" ${CMAKE_MODULE_PATH})
 find_package(Sqlite3 REQUIRED sqlite3)
 find_package(Threads)
 
 # Define sources and executable
-include_directories(${adventure_SOURCE_DIR}/inc/)
-link_directories(${adventure_SOURCE_DIR}/src/)
-set(EXECUTABLE_NAME "psy-lightbookmarkd")
+include_directories(${psylbm_SOURCE_DIR}/inc/)
+link_directories(${psylbm_SOURCE_DIR}/src/)
+set(EXECUTABLE_NAME "psylbm")
 add_executable(${EXECUTABLE_NAME} 
 main.c
 server.c

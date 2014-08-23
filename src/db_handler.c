@@ -51,9 +51,12 @@ psy_lbm_find_user(sqlite3* _db, uint32_t _id) {
   user_t* u = NULL;
   u = malloc(sizeof(user_t));
   
+  
+
   return u;
 };
 
+/* Look for a user. Null if not found */
 user_t*
 psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   sqlite3_stmt* stmt = NULL;
@@ -69,11 +72,15 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
 
   printf("%s || %d", SQL_FIND_USER_BY_NAME, sqlite3_bind_parameter_count(stmt));
 
-  sqlite3_bind_text(stmt, 1, u->name, strlen(u->name), SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 1, _name, strlen(u->name), SQLITE_TRANSIENT);
 
   rc = sqlite3_step(stmt);
 
-  printf("--- %d\n", rc);
+  if (rc == SQLITE_ROW) {
+    printf("found row\n");
+  }
+
+  sqlite3_finalize(stmt);
 
   return u;
 }
