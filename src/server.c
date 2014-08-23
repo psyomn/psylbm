@@ -72,7 +72,7 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
       continue;
     }
 
-    psy_lbm_insert_bookmark(_server->db, 1, "Nozoki Ana", 1, 12, 10);
+    psy_lbm_insert_bookmark(_server->db, 1, "Potato Girl", 1, 12, 10);
     psy_lbm_insert_user(_server->db, "user", "password");
 
     printf("Received %d bytes\n", recvlen);
