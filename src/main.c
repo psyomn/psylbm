@@ -22,7 +22,7 @@ main(int argc, char* argv[]) {
 void* 
 start(void* data) {
   psy_lbm_server_t* server = NULL;
-  server = psy_lbm_make_server(8080, "hello");
+  server = psy_lbm_make_server(8080, "localhost");
 
   psy_lbm_print_server_info(server);
   psy_lbm_server_listen(server);
