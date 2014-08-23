@@ -73,6 +73,10 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
     }
 
     psy_lbm_handle_message(_server, buffer);
+
+    char temp[] = "hello back at you";
+    sendto(fd, temp, sizeof(temp), 0, (struct sockaddr*)&remote_address, address_length);
+
     memset((void*) buffer, 0, sizeof(buffer));
   }
 

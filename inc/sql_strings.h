@@ -5,7 +5,7 @@
 #define SQL_CREATE_USERS \
   "CREATE TABLE users("\
     "id INTEGER PRIMARY KEY AUTOINCREMENT, "\
-    "username TEXT UNIQUE, password TEXT);"
+    "username TEXT UNIQUE, password TEXT, salt TEXT);"
 
 #define SQL_CREATE_BOOKMARKS \
   "create table bookmarks("\
@@ -42,6 +42,9 @@
 
 #define SQL_FIND_BOOKMARKS_BY_USER_ID \
   "SELECT * FROM bookmarks WHERE user_id = ?;"
+
+#define SQL_UPDATE_TOKEN \
+  "UPDATE api_tokens set tokens=? where user_id=?"
 
 #endif
 

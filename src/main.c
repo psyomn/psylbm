@@ -33,6 +33,7 @@ start(void* data) {
 /* Any needed init goes here */
 void
 init() {
+  srand(time(NULL));
   psy_lbm_check_db();
 }
 
