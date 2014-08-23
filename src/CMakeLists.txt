@@ -22,6 +22,7 @@ include_directories("${PROJECT_BINARY_DIR}")
 set(CMAKE_MODULE_PATH "${psylbm_SOURCE_DIR}/modules" ${CMAKE_MODULE_PATH})
 find_package(Sqlite3 REQUIRED sqlite3)
 find_package(Threads)
+find_package(OpenSSL REQUIRED)
 
 # Define sources and executable
 include_directories(${psylbm_SOURCE_DIR}/inc/)
