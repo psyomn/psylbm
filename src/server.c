@@ -72,12 +72,7 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
       continue;
     }
 
-    psy_lbm_insert_bookmark(_server->db, 1, "Potato Girl", 1, 12, 10);
-    psy_lbm_insert_user(_server->db, "user", "password");
-
-    printf("Received %d bytes\n", recvlen);
-    printf("[%s]\n", buffer);
-    psy_lbm_handle_message(buffer);
+    psy_lbm_handle_message(_server, buffer);
     memset((void*) buffer, 0, sizeof(buffer));
   }
 

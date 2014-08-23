@@ -12,6 +12,9 @@ struct user {
 };
 typedef struct user user_t;
 
+void
+psy_lbm_free_user(user_t*);
+
 struct bookmark {
   uint32_t id; 
   uint32_t user_id;

@@ -48,11 +48,31 @@ psy_lbm_make_db() {
 
 user_t* 
 psy_lbm_find_user(sqlite3* _db, uint32_t _id) {
+  sqlite3_stmt* stmt = NULL;
   user_t* u = NULL;
-  u = malloc(sizeof(user_t));
-  
-  
+  const char** t = NULL;
+  int rc;
 
+  u = malloc(sizeof(user_t));
+
+  sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_ID,
+                     sizeof(SQL_FIND_USER_BY_ID), &stmt, t);
+
+  sqlite3_bind_int(stmt, 1, _id);
+
+  rc = sqlite3_step(stmt);
+
+  if (rc == SQLITE_ROW) {
+    u->id = sqlite3_column_int(stmt, 0);
+    u->name = (char*) sqlite3_column_text(stmt, 1);
+    u->password = NULL;
+  }
+  else {
+    psy_lbm_free_user(u);
+    u = NULL;
+  }
+
+  sqlite3_finalize(stmt);
   return u;
 };
 
@@ -70,14 +90,21 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_NAME, 
                      sizeof(SQL_FIND_USER_BY_NAME), &stmt, t);
 
-  printf("%s || %d", SQL_FIND_USER_BY_NAME, sqlite3_bind_parameter_count(stmt));
-
   sqlite3_bind_text(stmt, 1, _name, strlen(u->name), SQLITE_TRANSIENT);
 
   rc = sqlite3_step(stmt);
 
+  /* We only want the first occurence, and duplicate usernames should not exist 
+   * due to the unique restriction */
   if (rc == SQLITE_ROW) {
-    printf("found row\n");
+    printf("fetch: %s\n", sqlite3_column_text(stmt, 1));
+    u->id = sqlite3_column_int(stmt, 0);
+    printf("id   : %d\n", u->id);
+    u->password = NULL;
+  }
+  else {
+    psy_lbm_free_user(u);
+    u = NULL;
   }
 
   sqlite3_finalize(stmt);
@@ -89,6 +116,7 @@ void
 psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   sqlite3_stmt* stmt = NULL;
   const char**  t = NULL;
+  user_t* u = NULL;
 
   sqlite3_prepare_v2(_db, SQL_INSERT_USER, 
                      sizeof(SQL_INSERT_USER), &stmt, t);
@@ -98,6 +126,8 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting user row");
+    sqlite3_finalize(stmt);
+    return;
   }
 
   sqlite3_finalize(stmt);
@@ -108,7 +138,10 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
    * update/set the api token, we just run an update
    */
    
-  psy_lbm_find_user_by_name(_db, _username);
+  u = psy_lbm_find_user_by_name(_db, _username);
+  _psy_lbm_make_api_token_row(_db, u->id);
+  psy_lbm_free_user(u);
+
 }
 
 void
@@ -147,6 +180,7 @@ _psy_lbm_make_api_token_row(sqlite3* _db, uint32_t _user_id) {
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting api token");
   }
+
   sqlite3_finalize(stmt);
 }
 

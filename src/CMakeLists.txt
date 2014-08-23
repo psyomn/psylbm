@@ -32,6 +32,7 @@ main.c
 server.c
 message_handler.c
 db_handler.c
+domain.c
 )
 
 target_link_libraries(${EXECUTABLE_NAME} "${CMAKE_THREAD_LIBS_INIT}")

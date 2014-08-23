@@ -1,8 +1,10 @@
+#include "domain.h"
+#include "db_handler.h"
 #include "message_handler.h"
 #include "common.h"
 
 void 
-psy_lbm_handle_message(char* _message) {
+psy_lbm_handle_message(psy_lbm_server_t* _s, char* _message) {
   char delimiters[] = "|";
   char *token;
 
@@ -28,7 +30,7 @@ psy_lbm_handle_message(char* _message) {
     char* pass = strtok(NULL, delimiters);
     printf("  user: %s\n", user);
 
-    psy_lbm_handle_register(user, pass);
+    psy_lbm_handle_register(_s, user, pass);
   }
 
   else {
@@ -41,7 +43,8 @@ psy_lbm_handle_message(char* _message) {
  * provided a username and password generate a token, and send it back
  */
 char*
-psy_lbm_handle_authorization(char* _username, char* _password) {
+psy_lbm_handle_authorization(psy_lbm_server_t* _s, 
+                             char* _username, char* _password) {
 
 }
 
@@ -51,8 +54,8 @@ psy_lbm_handle_authorization(char* _username, char* _password) {
  * new record is created.
  */
 int
-psy_lbm_handle_insert(char* _title, uint32_t _vol ,uint32_t _chapter, 
-                      uint32_t _page, char* _token) {
+psy_lbm_handle_insert(psy_lbm_server_t* _s, char* _title, uint32_t _vol, 
+                      uint32_t _chapter, uint32_t _page, char* _token) {
 
 }
 
@@ -60,9 +63,9 @@ psy_lbm_handle_insert(char* _title, uint32_t _vol ,uint32_t _chapter,
  * Register an account. Return a status int.
  */
 int
-psy_lbm_handle_register(char* _user, char* _pass) {
+psy_lbm_handle_register(psy_lbm_server_t* _s, char* _user, char* _pass) {
   /* Check if the account exists */
-
+  psy_lbm_insert_user(_s->db, _user, _pass);
   return 1;
 }
 

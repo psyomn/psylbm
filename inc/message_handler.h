@@ -3,17 +3,20 @@
 
 #include <stdint.h>
 
+#include <server.h>
+
 void
-psy_lbm_handle_message(char*);
+psy_lbm_handle_message(psy_lbm_server_t*, char*);
 
 char*
-psy_lbm_handle_authorization(char*, char*);
+psy_lbm_handle_authorization(psy_lbm_server_t*, char*, char*);
 
 int
-psy_lbm_handle_insert(char*,uint32_t,uint32_t,uint32_t,char*);
+psy_lbm_handle_insert(psy_lbm_server_t*, char*, uint32_t,
+  uint32_t, uint32_t, char*);
 
 int
-psy_lbm_handle_register(char*,char*);
+psy_lbm_handle_register(psy_lbm_server_t*, char*, char*);
 
 int
 psy_lbm_handle_error(char*);
