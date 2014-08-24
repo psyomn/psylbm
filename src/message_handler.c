@@ -4,6 +4,12 @@
 #include <common.h>
 #include <protocol_responses.h>
 
+static void
+_psy_lbm_reply(psy_lbm_server_t* _s, remote_host_t* _h, char* _message) {
+    sendto(_s->sock, _message, strlen(_message), 
+           0, (struct sockaddr*)&_h->a, _h->l);
+}
+
 void 
 psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h, 
                        char* _message) {
@@ -84,6 +90,8 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
     printf("login possible\n");
     char* token = _psy_lbm_generate_token();
     printf("  generated token: [%s]\n", token);
+    psy_lbm_handle_token(_s, _h, u->id, token);
+    free(token);
   }
   else {
     printf("passwords don't match\n");
@@ -117,21 +125,33 @@ psy_lbm_handle_register(psy_lbm_server_t* _s, remote_host_t* _h, char* _user,
 
   if (ret == -1) {
     /* Some problem with query */
-    sendto(_s->sock, PSYLBM_SERVER_ERROR, sizeof(PSYLBM_SERVER_ERROR), 
-           0, (struct sockaddr*)&_h->a, _h->l);
+    _psy_lbm_reply(_s, _h, PSYLBM_SERVER_ERROR);
   }
   else if (ret == -2) {
     /* User already exist */
-    sendto(_s->sock, PSYLBM_USERNAME_TAKEN, sizeof(PSYLBM_USERNAME_TAKEN), 
-           0, (struct sockaddr*)&_h->a, _h->l);
+    _psy_lbm_reply(_s, _h, PSYLBM_USERNAME_TAKEN);
     printf("--| Username [%s] has been taken.\n", _user); /* TODO: logme */
   }
   else {
     /* Everything ok */
-    sendto(_s->sock, PSYLBM_REGISTRATION_OK, sizeof(PSYLBM_REGISTRATION_OK), 
-           0, (struct sockaddr*)&_h->a, _h->l);
+    _psy_lbm_reply(_s, _h, PSYLBM_REGISTRATION_OK);
     printf("--| Username [%s] registered.\n", _user); /* TODO: logme */
   }
+}
+
+int
+psy_lbm_handle_token(psy_lbm_server_t* _s, remote_host_t* _h, uint32_t _user_id,
+                  char* _token) {
+  int ret = psy_lbm_set_token(_s->db, _user_id, _token);
+
+  if (!ret) { 
+    psy_lbm_set_token(_s->db, _user_id, _token);
+    _psy_lbm_reply(_s, _h, _token);
+  } 
+  else {
+    _psy_lbm_reply(_s, _h, "weird problems arise");
+  }
+  return 0;
 }
 
 /* TODO In case we ever want to log, this should handle the error */

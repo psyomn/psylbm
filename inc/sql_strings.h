@@ -29,6 +29,9 @@
 #define SQL_INSERT_API \
   "INSERT INTO api_tokens (user_id, token) VALUES (?,?)"
 
+#define SQL_UPDATE_TOKEN \
+  "UPDATE api_tokens set token=? where user_id=?"
+
 #define SQL_INSERT_BOOKMARK \
   "INSERT INTO bookmarks (user_id,title,volume,chapter,page)"\
   " VALUES (?,?,?,?,?);"
@@ -42,9 +45,6 @@
 
 #define SQL_FIND_BOOKMARKS_BY_USER_ID \
   "SELECT * FROM bookmarks WHERE user_id = ?;"
-
-#define SQL_UPDATE_TOKEN \
-  "UPDATE api_tokens set tokens=? where user_id=?"
 
 #endif
 

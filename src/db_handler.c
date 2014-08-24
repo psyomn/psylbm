@@ -154,7 +154,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
    */
    
   u = psy_lbm_find_user_by_name(_db, _username);
-  _psy_lbm_make_api_token_row(_db, u->id);
+  psy_lbm_make_token(_db, u->id, "new");
   psy_lbm_free_user(u);
 
 }
@@ -182,23 +182,42 @@ psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
 }
 
 /** This should only be called once, from user creation */
-void
-_psy_lbm_make_api_token_row(sqlite3* _db, uint32_t _user_id) {
+int
+psy_lbm_make_token(sqlite3* _db, uint32_t _user_id, char* _token) {
   sqlite3_stmt* stmt = NULL;
   const char** t = NULL;
-  const char ntxt[] = "new";
-  sqlite3_prepare_v2(_db, SQL_INSERT_API, sizeof(SQL_INSERT_API), &stmt, t);
 
+  sqlite3_prepare_v2(_db, SQL_INSERT_API, sizeof(SQL_INSERT_API), &stmt, t);
   sqlite3_bind_int(stmt, 1, _user_id);
-  sqlite3_bind_text(stmt, 2, ntxt, strlen(ntxt), SQLITE_STATIC);
+  sqlite3_bind_text(stmt, 2, _token, strlen(_token), SQLITE_STATIC);
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting api token");
+    return -1;
   }
 
   sqlite3_finalize(stmt);
+  return 0;
 }
 
+/** Update login token */
+int
+psy_lbm_set_token(sqlite3* _db, uint32_t _user_id, char* _token) {
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
+
+  sqlite3_prepare_v2(_db, SQL_UPDATE_TOKEN, sizeof(SQL_UPDATE_TOKEN), &stmt, t);
+  sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_STATIC);
+  sqlite3_bind_int(stmt,  2, _user_id);
+
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    perror("Problem setting api token");
+    return -1;
+  }
+
+  sqlite3_finalize(stmt);
+  return 0;
+}
 
 /** Search user by name. return 0 on not found, else 1 */
 int 
@@ -269,3 +288,4 @@ _psy_lbm_generate_token() {
 
   return ret_string;
 }
+

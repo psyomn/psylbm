@@ -6,6 +6,12 @@
 #include <server.h>
 #include <domain.h>
 
+static void
+_psy_lbm_reply(
+  psy_lbm_server_t*,
+  remote_host_t*,
+  char*);
+
 void
 psy_lbm_handle_message(
   psy_lbm_server_t*, 
@@ -32,6 +38,13 @@ psy_lbm_handle_register(
   psy_lbm_server_t*, 
   remote_host_t*, 
   char*, char*);
+
+int
+psy_lbm_handle_token(
+  psy_lbm_server_t*,
+  remote_host_t*,
+  uint32_t,
+  char*);
 
 /* Logging */
 int
