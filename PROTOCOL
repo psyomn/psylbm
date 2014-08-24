@@ -27,7 +27,7 @@ AUTHENTICATION
   Success response:
     <auth>|<token>
   Failure:
-    <fail>
+    <auth>|<fail>
 
 INSERT
 
@@ -46,3 +46,10 @@ SYNCHRONIZATION
     <sync>|<token>
   Sync response: 
     [<bookmark>]*
+
+MISUSE
+
+  (Mainly for malformed requests)
+  Response:
+    <badrequest>
+
