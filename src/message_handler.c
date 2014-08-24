@@ -26,10 +26,8 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
   }
 
   if (!strcmp(token, "auth")) {
-    printf("received auth request\n");
     char* user = strtok(NULL, delimiters);
     char* pass = strtok(NULL, delimiters);
-    printf("auth [%s]\n", user);
     psy_lbm_handle_authorization(_s, _h, user, pass);
   }
 
@@ -71,26 +69,23 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
   
   if (u == NULL) {
     /* No user found - send back fail message */
-    sendto(_s->sock, PSYLBM_AUTH_FAIL, sizeof(PSYLBM_AUTH_FAIL), 
-           0, (struct sockaddr*)&_h->a, _h->l);
+    _psy_lbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
     return ret;
   }
 
   salt = atoi(u->salt);
   hash = _psy_lbm_hash_password(_password, salt);
 
-  printf("Calculated hash: %s\n", hash);
-
   if (!strcmp(hash, u->password)) {
-    printf("login possible\n");
     char* token = _psy_lbm_generate_token();
-    printf("  generated token: [%s]\n", token);
     psy_lbm_handle_token(_s, _h, u->id, token);
+    printf("Authenticate [%s]-[%s]\n", u->name, token);
     free(token);
   }
   else {
     /* TODO Log me */
     printf("Failed login attempt [%s]\n", u->name);
+    _psy_lbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
   }
 
   free(hash);
@@ -145,10 +140,16 @@ psy_lbm_handle_token(psy_lbm_server_t* _s, remote_host_t* _h, uint32_t _user_id,
 
   if (!ret) { 
     psy_lbm_set_token(_s->db, _user_id, _token);
-    _psy_lbm_reply(_s, _h, _token);
+
+    /* Build response text */
+    char resp[100];
+    memset(resp, 0, sizeof(resp));
+    strcpy(resp, PSYLBM_AUTH);
+    strcat(resp, _token);
+    _psy_lbm_reply(_s, _h, resp);
   } 
   else {
-    _psy_lbm_reply(_s, _h, "weird problems arise");
+    _psy_lbm_reply(_s, _h, PSYLBM_SERVER_ERROR);
   }
   return 0;
 }
@@ -159,3 +160,4 @@ psy_lbm_handle_error(char* _sent_stuff) {
 
   return 0;
 }
+
