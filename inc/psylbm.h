@@ -1,0 +1,8 @@
+#ifndef PSYLBM_H
+#define PSYLBM_H
+
+#define PSYLBM_USERNAME_LENGTH 50
+#define PSYLBM_PASSWORD_LENGTH 50
+#define PSYLBM_TITLE_LENGTH    200
+
+#endif
