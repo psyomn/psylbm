@@ -9,7 +9,11 @@ PSYLIGHTBOOKMARK PROTOCOL
 
 REGISTRATION
 
-  <username> ::= [:alpha:]+[:alphanum:]+
+  (Any symbol but pipe)
+  <symbols>  ::= [!@#$%^&*()_+-={}[]\":;'/?,.<>]
+
+  (So usernames are any chars, but pipes, and range from 1 to 50 chars)
+  <username> ::= ([:alphanum:]|<symbols>){1,50}
 
   Registration request:
     <reg>|<username>|<password>
@@ -22,6 +26,7 @@ REGISTRATION
 
 AUTHENTICATION
 
+  (A token is a sha256 hashed value)
   Login request:
     <auth>|<username>|<password> 
   Success response:
