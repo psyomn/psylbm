@@ -14,6 +14,7 @@
 
 #define PSYLBM_SYNC            "sync|"
 
-#define PSYLBM_SERVER_ERROR    "server.error"
+#define PSYLBM_SERVER_ERROR    "server-error"
+#define PSYLBM_BAD_REQUEST     "bad-request"
 
 #endif
