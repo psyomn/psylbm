@@ -1,7 +1,9 @@
-#include "db_handler.h"
+#include <db_handler.h>
+#include <common.h>
+#include <sql_strings.h>
+#include <psylbm.h>
 
-#include "common.h"
-#include "sql_strings.h"
+#include <openssl/sha.h>
 #include <sqlite3.h>
 
 /* Check if db exists - create if not */
@@ -112,20 +114,26 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
 
 int
 psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
-  sqlite3_stmt* stmt = NULL;
-  const char**  t = NULL;
-  user_t* u = NULL;
+  sqlite3_stmt*  stmt = NULL;
+  const char**   t = NULL;
+  char* hashed_password = NULL;
+  user_t*        u = NULL;
+  int            salt = time(0);
+  char           salt_str[11];
 
   /* Before anything, make sure that the user doesn't exist */
   if (_psy_lbm_user_exists(_db, _username))
     return -2;
     
+  sprintf(salt_str, "%d", salt);
+  hashed_password = _psy_lbm_hash_password(_password, salt);
+
   sqlite3_prepare_v2(_db, SQL_INSERT_USER, 
                      sizeof(SQL_INSERT_USER), &stmt, t);
 
   sqlite3_bind_text(stmt, 1, _username, strlen(_username), SQLITE_TRANSIENT);
-  sqlite3_bind_text(stmt, 2, _password, strlen(_password), SQLITE_TRANSIENT);
-  
+  sqlite3_bind_text(stmt, 2, hashed_password, strlen(hashed_password), SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 3, salt_str,  strlen(salt_str),  SQLITE_TRANSIENT);
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting user row");
@@ -133,6 +141,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
     return -1;
   }
 
+  free(hashed_password);
   sqlite3_finalize(stmt);
 
   /* 
@@ -200,3 +209,39 @@ _psy_lbm_user_exists(sqlite3* _db, char* _name) {
   psy_lbm_free_user(u);
   return 1;
 }
+
+/*
+ * Thanks to Adam Lamers
+ *   http://stackoverflow.com/questions/2262386/
+ */
+char*
+_psy_lbm_hash_password(char* _pass, int _salt) {
+  unsigned char hashed_pass[SHA256_DIGEST_LENGTH]; 
+  char* ret_string = malloc(SHA256_DIGEST_LENGTH * 2 + 1);
+  /* 10 is since epoch bytes for salt */ 
+  char string[PSYLBM_PASSWORD_LENGTH + 10 + 1];
+  char since_epoch[11];
+  const int buffsize[32768];
+  int i = 0;
+
+  /* Build salted string */
+  memset(string, 0, sizeof(string));
+  sprintf(since_epoch, "%d", _salt);
+  strcpy(string, _pass);
+  strcat(string, since_epoch);
+
+  /* And get the hashed value */
+  SHA256_CTX sha256;
+  SHA256_Init(&sha256);
+  SHA256_Update(&sha256, string, strlen(string));
+  SHA256_Final(hashed_pass, &sha256);
+
+  for (i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+    sprintf((ret_string + (i * 2)), "%02x", hashed_pass[i]);
+  }
+
+  return ret_string;
+}
+
+
+

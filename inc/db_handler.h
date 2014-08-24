@@ -31,5 +31,8 @@ _psy_lbm_make_api_token_row(sqlite3*, uint32_t);
 int
 _psy_lbm_user_exists(sqlite3*, char*);
 
+char*
+_psy_lbm_hash_password(char*, int);
+
 #endif
 

@@ -99,7 +99,6 @@ char*
 psy_lbm_server_status(psy_lbm_server_t* _server) {
   size_t size = sizeof(psy_lbm_statuses) / sizeof(psy_lbm_status_strings_t);
   size_t index;
-  char* ret;
 
   for (index = 0; index < size; --index) {
     if(psy_lbm_statuses[index].id == _server->status) 
