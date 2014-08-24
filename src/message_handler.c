@@ -4,7 +4,7 @@
 #include <common.h>
 #include <protocol_responses.h>
 
-static void
+void
 _psy_lbm_reply(psy_lbm_server_t* _s, remote_host_t* _h, char* _message) {
     sendto(_s->sock, _message, strlen(_message), 
            0, (struct sockaddr*)&_h->a, _h->l);
@@ -76,11 +76,6 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
     return ret;
   }
 
-  printf("found: \n"
-    "  name: [%s]\n"
-    "  hash: [%s]\n"
-    "  salt: [%s]\n", u->name, u->password, u->salt);
-
   salt = atoi(u->salt);
   hash = _psy_lbm_hash_password(_password, salt);
 
@@ -94,7 +89,8 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
     free(token);
   }
   else {
-    printf("passwords don't match\n");
+    /* TODO Log me */
+    printf("Failed login attempt [%s]\n", u->name);
   }
 
   free(hash);
@@ -113,6 +109,7 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, char* _title,
                       uint32_t _vol, uint32_t _chapter, uint32_t _page, 
                       char* _token) {
 
+  return 0;
 }
 
 /*
@@ -137,6 +134,8 @@ psy_lbm_handle_register(psy_lbm_server_t* _s, remote_host_t* _h, char* _user,
     _psy_lbm_reply(_s, _h, PSYLBM_REGISTRATION_OK);
     printf("--| Username [%s] registered.\n", _user); /* TODO: logme */
   }
+
+  return 0;
 }
 
 int
@@ -158,4 +157,5 @@ psy_lbm_handle_token(psy_lbm_server_t* _s, remote_host_t* _h, uint32_t _user_id,
 int
 psy_lbm_handle_error(char* _sent_stuff) {
 
+  return 0;
 }

@@ -157,6 +157,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   psy_lbm_make_token(_db, u->id, "new");
   psy_lbm_free_user(u);
 
+  return 0;
 }
 
 void

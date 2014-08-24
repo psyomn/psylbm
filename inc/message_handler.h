@@ -6,7 +6,7 @@
 #include <server.h>
 #include <domain.h>
 
-static void
+void
 _psy_lbm_reply(
   psy_lbm_server_t*,
   remote_host_t*,
