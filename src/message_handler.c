@@ -22,8 +22,9 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
   if (!strcmp(token, "auth")) {
     printf("received auth request\n");
     char* user = strtok(NULL, delimiters);
-    char* password = strtok(NULL, delimiters);
+    char* pass = strtok(NULL, delimiters);
     printf("auth [%s]\n", user);
+    psy_lbm_handle_authorization(_s, _h, user, pass);
   }
 
   else if (!strcmp(token, "ins")) {
@@ -57,7 +58,41 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
 char*
 psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
                              char* _username, char* _password) {
+  char* ret  = NULL;
+  char* hash = NULL;
+  int salt;
+  user_t* u = psy_lbm_find_user_by_name(_s->db, _username);
+  
+  if (u == NULL) {
+    /* No user found - send back fail message */
+    sendto(_s->sock, PSYLBM_AUTH_FAIL, sizeof(PSYLBM_AUTH_FAIL), 
+           0, (struct sockaddr*)&_h->a, _h->l);
+    return ret;
+  }
 
+  printf("found: \n"
+    "  name: [%s]\n"
+    "  hash: [%s]\n"
+    "  salt: [%s]\n", u->name, u->password, u->salt);
+
+  salt = atoi(u->salt);
+  hash = _psy_lbm_hash_password(_password, salt);
+
+  printf("Calculated hash: %s\n", hash);
+
+  if (!strcmp(hash, u->password)) {
+    printf("login possible\n");
+    char* token = _psy_lbm_generate_token();
+    printf("  generated token: [%s]\n", token);
+  }
+  else {
+    printf("passwords don't match\n");
+  }
+
+  free(hash);
+  psy_lbm_free_user(u);
+
+  return ret;
 }
 
 /* Send the book info (title, vol, chapter, page), and if the token is a valid

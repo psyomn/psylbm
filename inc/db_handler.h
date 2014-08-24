@@ -34,5 +34,8 @@ _psy_lbm_user_exists(sqlite3*, char*);
 char*
 _psy_lbm_hash_password(char*, int);
 
+char*
+_psy_lbm_generate_token();
+
 #endif
 

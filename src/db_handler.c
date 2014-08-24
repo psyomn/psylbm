@@ -55,7 +55,7 @@ psy_lbm_find_user(sqlite3* _db, uint32_t _id) {
   const char** t = NULL;
   int rc;
 
-  u = malloc(sizeof(user_t));
+  u = psy_lbm_make_user();
 
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_ID,
                      sizeof(SQL_FIND_USER_BY_ID), &stmt, t);
@@ -66,8 +66,9 @@ psy_lbm_find_user(sqlite3* _db, uint32_t _id) {
 
   if (rc == SQLITE_ROW) {
     u->id = sqlite3_column_int(stmt, 0);
-    u->name = (char*) sqlite3_column_text(stmt, 1);
-    u->password = NULL;
+    u->name = strdup((char*) sqlite3_column_text(stmt, 1));
+    u->password = strdup((char*) sqlite3_column_text(stmt, 2));
+    u->salt = strdup((char*) sqlite3_column_text(stmt, 3));
   }
   else {
     psy_lbm_free_user(u);
@@ -86,7 +87,7 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   const char** t = NULL;
   int rc;
 
-  u = malloc(sizeof(user_t));
+  u = psy_lbm_make_user();
   u->name = strdup(_name);
 
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_NAME, 
@@ -99,8 +100,10 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   /* We only want the first occurence, and duplicate usernames should not exist 
    * due to the unique restriction */
   if (rc == SQLITE_ROW) {
-    u->id = sqlite3_column_int(stmt, 0);
-    u->password = NULL;
+    u->id       = sqlite3_column_int(stmt, 0);
+    u->name     = strdup((char*)sqlite3_column_text(stmt, 1));
+    u->password = strdup((char*)sqlite3_column_text(stmt, 2));
+    u->salt     = strdup((char*)sqlite3_column_text(stmt, 3));
   }
   else {
     psy_lbm_free_user(u);
@@ -202,9 +205,8 @@ int
 _psy_lbm_user_exists(sqlite3* _db, char* _name) {
   user_t* u = psy_lbm_find_user_by_name(_db, _name);
 
-  if (u == NULL) {
+  if (u == NULL) 
     return 0;
-  }
 
   psy_lbm_free_user(u);
   return 1;
@@ -221,7 +223,6 @@ _psy_lbm_hash_password(char* _pass, int _salt) {
   /* 10 is since epoch bytes for salt */ 
   char string[PSYLBM_PASSWORD_LENGTH + 10 + 1];
   char since_epoch[11];
-  const int buffsize[32768];
   int i = 0;
 
   /* Build salted string */
@@ -243,5 +244,28 @@ _psy_lbm_hash_password(char* _pass, int _salt) {
   return ret_string;
 }
 
+char*
+_psy_lbm_generate_token() {
+  int buffsize = 124;
+  char rand_data[buffsize];
+  int max = buffsize;
+  int i;
+  unsigned char hashed[SHA256_DIGEST_LENGTH];
+  char* ret_string = malloc(SHA256_DIGEST_LENGTH * 2 + 1);
 
+  /* Fill in a random string */
+  for (i = 0; i < max; ++i) {
+    rand_data[i] = rand() % 0xFF;
+  }
 
+  SHA256_CTX sha256;
+  SHA256_Init(&sha256);
+  SHA256_Update(&sha256, rand_data, strlen(rand_data));
+  SHA256_Final(hashed, &sha256);
+
+  for (i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+    sprintf((ret_string + (i * 2)), "%02x", hashed[i]);
+  }
+
+  return ret_string;
+}

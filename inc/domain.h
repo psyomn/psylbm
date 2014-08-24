@@ -9,11 +9,15 @@ struct user {
   uint32_t id;
   char* name;
   char* password;
+  char* salt;
 };
 typedef struct user user_t;
 
 void
 psy_lbm_free_user(user_t*);
+
+user_t*
+psy_lbm_make_user();
 
 struct bookmark {
   uint32_t id; 
