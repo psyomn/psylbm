@@ -1,3 +1,4 @@
+#include <psylbm.h>
 #include <domain.h>
 #include <db_handler.h>
 #include <message_handler.h>
@@ -46,12 +47,14 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
       badrequest = 1;
     }
   }
+  else {
+    badrequest = 1;
+  }
 
   if (badrequest) {
     /* TODO: a logger would be nice here */
-    printf("Received bad request [%s]\n", _message);
-    sendto(_s->sock, PSYLBM_BAD_REQUEST, sizeof(PSYLBM_BAD_REQUEST), 
-           0, (struct sockaddr*)&_h->a, _h->l);
+    printf("Received malformed request [%s]\n", _message);
+    _psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
   }
 
 }
@@ -103,7 +106,7 @@ int
 psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, char* _title, 
                       uint32_t _vol, uint32_t _chapter, uint32_t _page, 
                       char* _token) {
-
+  
   return 0;
 }
 
@@ -113,6 +116,16 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, char* _title,
 int
 psy_lbm_handle_register(psy_lbm_server_t* _s, remote_host_t* _h, char* _user, 
                         char* _pass) {
+  int usr_l = strlen(_user), pass_l = strlen(_pass); 
+  int lengths_ok = 
+    usr_l > 0 && usr_l <= PSYLBM_USERNAME_LENGTH &&
+    pass_l > 0 && pass_l <= PSYLBM_PASSWORD_LENGTH;
+
+  if (!lengths_ok) {
+    _psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
+    return -1;
+  }
+
   int ret = psy_lbm_insert_user(_s->db, _user, _pass);
 
   if (ret == -1) {
