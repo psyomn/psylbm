@@ -23,8 +23,8 @@
 
 /* Inserts */
 #define SQL_INSERT_USER \
-  "INSERT INTO users (username, password) "\
-  "VALUES (?,?);"
+  "INSERT INTO users (username, password, salt) "\
+  "VALUES (?,?,?);"
 
 #define SQL_INSERT_API \
   "INSERT INTO api_tokens (user_id, token) VALUES (?,?)"
