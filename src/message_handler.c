@@ -1,17 +1,22 @@
-#include "domain.h"
-#include "db_handler.h"
-#include "message_handler.h"
-#include "common.h"
+#include <domain.h>
+#include <db_handler.h>
+#include <message_handler.h>
+#include <common.h>
+#include <protocol_responses.h>
 
 void 
-psy_lbm_handle_message(psy_lbm_server_t* _s, char* _message) {
+psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h, 
+                       char* _message) {
   char delimiters[] = "|";
   char *token;
 
   /* First token */
   token = strtok(_message, delimiters);
 
-  printf("%s\n",token);
+  if (token == NULL) {
+    /* Someone sent something empty in the first token (eg: "|||") */
+    return;
+  }
 
   if (!strcmp(token, "auth")) {
     printf("received auth request\n");
@@ -25,12 +30,11 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, char* _message) {
   }
 
   else if (!strcmp(token, "reg")) {
-    printf("Registration request\n");
     char* user = strtok(NULL, delimiters);
     char* pass = strtok(NULL, delimiters);
-    printf("  user: %s\n", user);
+    printf("Registration request [%s]\n", user);
 
-    psy_lbm_handle_register(_s, user, pass);
+    psy_lbm_handle_register(_s, _h, user, pass);
   }
 
   else {
@@ -43,7 +47,7 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, char* _message) {
  * provided a username and password generate a token, and send it back
  */
 char*
-psy_lbm_handle_authorization(psy_lbm_server_t* _s, 
+psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
                              char* _username, char* _password) {
 
 }
@@ -54,8 +58,9 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s,
  * new record is created.
  */
 int
-psy_lbm_handle_insert(psy_lbm_server_t* _s, char* _title, uint32_t _vol, 
-                      uint32_t _chapter, uint32_t _page, char* _token) {
+psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, char* _title, 
+                      uint32_t _vol, uint32_t _chapter, uint32_t _page, 
+                      char* _token) {
 
 }
 
@@ -63,10 +68,27 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, char* _title, uint32_t _vol,
  * Register an account. Return a status int.
  */
 int
-psy_lbm_handle_register(psy_lbm_server_t* _s, char* _user, char* _pass) {
-  /* Check if the account exists */
-  psy_lbm_insert_user(_s->db, _user, _pass);
-  return 1;
+psy_lbm_handle_register(psy_lbm_server_t* _s, remote_host_t* _h, char* _user, 
+                        char* _pass) {
+  int ret = psy_lbm_insert_user(_s->db, _user, _pass);
+
+  if (ret == -1) {
+    /* Some problem with query */
+    sendto(_s->sock, PSYLBM_SERVER_ERROR, sizeof(PSYLBM_SERVER_ERROR), 
+           0, (struct sockaddr*)&_h->a, _h->l);
+  }
+  else if (ret == -2) {
+    /* User already exist */
+    sendto(_s->sock, PSYLBM_USERNAME_TAKEN, sizeof(PSYLBM_USERNAME_TAKEN), 
+           0, (struct sockaddr*)&_h->a, _h->l);
+    printf("--| Username [%s] has been taken.\n", _user);
+  }
+  else {
+    /* Everything ok */
+    sendto(_s->sock, PSYLBM_REGISTRATION_OK, sizeof(PSYLBM_REGISTRATION_OK), 
+           0, (struct sockaddr*)&_h->a, _h->l);
+    printf("--| Username [%s] registered.\n", _user);
+  }
 }
 
 /* In case we ever want to log, this should handle the error */

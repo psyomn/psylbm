@@ -18,7 +18,7 @@ psy_lbm_find_user(sqlite3*, uint32_t);
 user_t*
 psy_lbm_find_user_by_name(sqlite3*, char*);
 
-void
+int
 psy_lbm_insert_user(sqlite3*, char*, char*);
 
 void
@@ -27,6 +27,9 @@ psy_lbm_insert_bookmark(sqlite3*, uint32_t, char*,
 
 void
 _psy_lbm_make_api_token_row(sqlite3*, uint32_t);
+
+int
+_psy_lbm_user_exists(sqlite3*, char*);
 
 #endif
 

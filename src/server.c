@@ -61,8 +61,12 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
     exit(0);
   }
 
+  _server->status = PSYLBM_LISTENING;
+  _server->sock = fd;
+
   while (_server->status != PSYLBM_SHUTDOWN) {
-    _server->status = PSYLBM_LISTENING;
+    remote_host_t host; 
+
     recvlen = recvfrom(
       fd, buffer, buffsize, 0,
       (struct sockaddr*)&remote_address, &address_length);
@@ -72,12 +76,12 @@ psy_lbm_server_listen(psy_lbm_server_t* _server) {
       continue;
     }
 
-    psy_lbm_handle_message(_server, buffer);
+    host.a = remote_address;
+    host.l = address_length;
 
-    char temp[] = "hello back at you";
-    sendto(fd, temp, sizeof(temp), 0, (struct sockaddr*)&remote_address, address_length);
+    psy_lbm_handle_message(_server, &host, buffer);
 
-    memset((void*) buffer, 0, sizeof(buffer));
+    memset(buffer, 0, sizeof(buffer));
   }
 
   printf("[ok]\n");

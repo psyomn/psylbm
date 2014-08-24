@@ -22,6 +22,7 @@ struct psy_lbm_server {
   char*    hostname;
   int      status;
   sqlite3* db;
+  int      sock;
 };
 
 typedef struct psy_lbm_server psy_lbm_server_t;

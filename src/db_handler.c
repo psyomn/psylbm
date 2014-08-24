@@ -29,7 +29,7 @@ psy_lbm_make_db() {
   int sql_ix;
   int sql_max = sizeof(sql_strs) / sizeof(char*);
 
-  printf("Making database for the first time ... ");
+  printf("Making database for the first time ... \n");
 
   sqlite3_open(PSYLBM_DB_NAME, &db);
 
@@ -97,9 +97,7 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   /* We only want the first occurence, and duplicate usernames should not exist 
    * due to the unique restriction */
   if (rc == SQLITE_ROW) {
-    printf("fetch: %s\n", sqlite3_column_text(stmt, 1));
     u->id = sqlite3_column_int(stmt, 0);
-    printf("id   : %d\n", u->id);
     u->password = NULL;
   }
   else {
@@ -112,22 +110,27 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   return u;
 }
 
-void
+int
 psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   sqlite3_stmt* stmt = NULL;
   const char**  t = NULL;
   user_t* u = NULL;
 
+  /* Before anything, make sure that the user doesn't exist */
+  if (_psy_lbm_user_exists(_db, _username))
+    return -2;
+    
   sqlite3_prepare_v2(_db, SQL_INSERT_USER, 
                      sizeof(SQL_INSERT_USER), &stmt, t);
 
   sqlite3_bind_text(stmt, 1, _username, strlen(_username), SQLITE_TRANSIENT);
   sqlite3_bind_text(stmt, 2, _password, strlen(_password), SQLITE_TRANSIENT);
+  
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting user row");
     sqlite3_finalize(stmt);
-    return;
+    return -1;
   }
 
   sqlite3_finalize(stmt);
@@ -184,3 +187,16 @@ _psy_lbm_make_api_token_row(sqlite3* _db, uint32_t _user_id) {
   sqlite3_finalize(stmt);
 }
 
+
+/** Search user by name. return 0 on not found, else 1 */
+int 
+_psy_lbm_user_exists(sqlite3* _db, char* _name) {
+  user_t* u = psy_lbm_find_user_by_name(_db, _name);
+
+  if (u == NULL) {
+    return 0;
+  }
+
+  psy_lbm_free_user(u);
+  return 1;
+}

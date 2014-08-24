@@ -1,7 +1,7 @@
 #ifndef DOMAIN_H
 #define DOMAIN_H
 
-#include <stdint.h>
+#include <common.h>
 
 /* Domain structures that are representations of tha table schemass */ 
 
@@ -30,6 +30,12 @@ struct api_token {
   char* token;
 };
 typedef struct api_token api_token_t;
+
+struct remote_host {
+  socklen_t l;
+  struct sockaddr_in a;
+};
+typedef struct remote_host remote_host_t;
 
 #endif 
 
