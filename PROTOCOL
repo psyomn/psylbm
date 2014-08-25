@@ -67,9 +67,25 @@ PURGE
 
 SYNCHRONIZATION
 
+  <bookmark-amount> is an unsigned 32-bit integer, which is the number of
+  bookmarks the user has stored.
+
   Sync request:
     <sync>|<token>
   Sync response: 
+    <bookmark-amount>
+
+  The above should be executed in order to get an amount of books to be
+  received. This way the user of the protocol can somewhat troubleshoot if all
+  the packets do not make it.
+
+  The bookmarks should be split up in the outgoing packets, as many as they may
+  be - the bookmark amount should give a clue to the client on the amount of
+  data that one is expecting. 
+
+  Sync request data:
+    <syncdata>|<token>
+  Sync data response: 
     [<bookmark-id>|<bookmark>]*
 
 MISUSE
