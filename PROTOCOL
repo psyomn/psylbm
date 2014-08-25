@@ -45,12 +45,32 @@ INSERT
   Insert response (failure):
     <ins>|<fail>
 
+DELETE
+
+  Delete request:
+    <del>|<bookmark-id>|<token>
+  Delete response (success):
+    <del>|<ok>
+  Delete response (fail):
+    <del>|<fail>
+
+PURGE
+
+  Used for deleting all bookmarks of a specific user.
+
+  Purge request:
+    <purge>|<token>
+  Purge response (success):
+    <purge>|<ok>
+  Purge response (failure):
+    <purge>|<fail>
+
 SYNCHRONIZATION
 
   Sync request:
     <sync>|<token>
   Sync response: 
-    [<bookmark>]*
+    [<bookmark-id>|<bookmark>]*
 
 MISUSE
 
