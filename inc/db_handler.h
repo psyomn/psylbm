@@ -4,7 +4,7 @@
 #include <sqlite3.h>
 #include "domain.h"
 
-#define PSYLBM_DB_NAME "psy-lightbookmark.sqlite3"
+#define PSYLBM_DB_NAME "psylbm-db.sqlite3"
 
 void
 psy_lbm_check_db();
@@ -21,7 +21,7 @@ psy_lbm_find_user_by_name(sqlite3*, char*);
 int
 psy_lbm_insert_user(sqlite3*, char*, char*);
 
-void
+int
 psy_lbm_insert_bookmark(sqlite3*, uint32_t, char*, 
   uint32_t, uint32_t, uint32_t);
 
@@ -39,6 +39,9 @@ _psy_lbm_hash_password(char*, int);
 
 char*
 _psy_lbm_generate_token();
+
+int32_t
+psy_lbm_find_user_id_by_token(sqlite3*, char*);
 
 #endif
 

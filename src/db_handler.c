@@ -160,7 +160,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   return 0;
 }
 
-void
+int
 psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
   uint32_t _volume, uint32_t _chapter, uint32_t _page) {
   sqlite3_stmt* stmt = NULL;
@@ -177,9 +177,11 @@ psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting bookmark");
+    return -1;
   }
 
   sqlite3_finalize(stmt);
+  return 0;
 }
 
 /** This should only be called once, from user creation */
@@ -266,7 +268,7 @@ _psy_lbm_hash_password(char* _pass, int _salt) {
 
 char*
 _psy_lbm_generate_token() {
-  int buffsize = 124;
+  int buffsize = 128;
   char rand_data[buffsize];
   int max = buffsize;
   int i;
@@ -288,5 +290,25 @@ _psy_lbm_generate_token() {
   }
 
   return ret_string;
+}
+
+int32_t
+psy_lbm_find_user_id_by_token(sqlite3* _db, char* _token) {
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
+  
+  sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_TOKEN, sizeof(SQL_FIND_USER_BY_TOKEN), &stmt, t);
+  sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_TRANSIENT);
+
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    sqlite3_finalize(stmt);
+    perror("Problem finding user by id");
+    return -1;
+  }
+
+  int32_t id = sqlite3_column_int(stmt, 0);
+  sqlite3_finalize(stmt);
+
+  return id;
 }
 
