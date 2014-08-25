@@ -31,6 +31,9 @@ psy_lbm_server_t*
 psy_lbm_make_server(uint16_t, char*);
 
 void
+psy_lbm_free_server(psy_lbm_server_t*);
+
+void
 psy_lbm_server_listen(psy_lbm_server_t*);
 
 void

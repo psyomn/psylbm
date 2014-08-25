@@ -93,7 +93,7 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_NAME, 
                      sizeof(SQL_FIND_USER_BY_NAME), &stmt, t);
 
-  sqlite3_bind_text(stmt, 1, _name, strlen(u->name), SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 1, _name, strlen(u->name), SQLITE_STATIC);
 
   rc = sqlite3_step(stmt);
 
@@ -134,9 +134,9 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   sqlite3_prepare_v2(_db, SQL_INSERT_USER, 
                      sizeof(SQL_INSERT_USER), &stmt, t);
 
-  sqlite3_bind_text(stmt, 1, _username, strlen(_username), SQLITE_TRANSIENT);
-  sqlite3_bind_text(stmt, 2, hashed_password, strlen(hashed_password), SQLITE_TRANSIENT);
-  sqlite3_bind_text(stmt, 3, salt_str,  strlen(salt_str),  SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 1, _username, strlen(_username), SQLITE_STATIC);
+  sqlite3_bind_text(stmt, 2, hashed_password, strlen(hashed_password), SQLITE_STATIC);
+  sqlite3_bind_text(stmt, 3, salt_str,  strlen(salt_str),  SQLITE_STATIC);
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting user row");
@@ -161,7 +161,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
 }
 
 int
-psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
+psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _name, char* _title,
   uint32_t _volume, uint32_t _chapter, uint32_t _page) {
   sqlite3_stmt* stmt = NULL;
   const char** t = NULL;
@@ -169,14 +169,15 @@ psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _title,
   sqlite3_prepare_v2(_db, SQL_INSERT_BOOKMARK,
                      sizeof(SQL_INSERT_BOOKMARK), &stmt, t);
 
-  sqlite3_bind_int(stmt, 1, _user_id);
-  sqlite3_bind_text(stmt, 2, _title, strlen(_title), SQLITE_TRANSIENT);
-  sqlite3_bind_int(stmt, 3, _volume);
-  sqlite3_bind_int(stmt, 4, _chapter);
-  sqlite3_bind_int(stmt, 5, _page);
+  sqlite3_bind_int(stmt,  1, _user_id);
+  sqlite3_bind_text(stmt, 2, _name,  strlen(_name), SQLITE_STATIC);
+  sqlite3_bind_text(stmt, 3, _title, strlen(_title), SQLITE_STATIC);
+  sqlite3_bind_int(stmt,  4, _volume);
+  sqlite3_bind_int(stmt,  5, _chapter);
+  sqlite3_bind_int(stmt,  6, _page);
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
-    perror("Problem inserting bookmark");
+    printf("Problem inserting bookmark [%d] [%s] [%s]\n", _user_id, _name, _title);
     return -1;
   }
 
@@ -299,11 +300,9 @@ psy_lbm_find_user_id_by_token(sqlite3* _db, char* _token) {
   int ret;
   
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_TOKEN, sizeof(SQL_FIND_USER_BY_TOKEN), &stmt, t);
-  sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_TRANSIENT);
+  sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_STATIC);
 
   ret = sqlite3_step(stmt);
-
-  printf("%d\n", ret);
 
   if (ret == SQLITE_ROW) {
     int32_t id = sqlite3_column_int(stmt, 0);

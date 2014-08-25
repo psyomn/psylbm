@@ -36,7 +36,11 @@ AUTHENTICATION
 
 INSERT
 
-  <bookmark> ::= <book-title>|<volume>|<chapter>|<page>
+  A <bookmark-name> is a unique name that the user gives to the bookmark in
+  order to discern it from other bookmarks (for example, same bookmark on same
+  book, page, chapter, volume, but different names).
+
+  <bookmark> ::= <bookmark-name>|<book-title>|<volume>|<chapter>|<page>
   
   Insert request:
     <ins>|<bookmark>|<token>

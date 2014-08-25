@@ -24,6 +24,12 @@ psy_lbm_make_server(uint16_t _portnum, char* _host) {
 }
 
 void
+psy_lbm_free_server(psy_lbm_server_t* _s) {
+  free(_s->hostname);
+  free(_s);
+}
+
+void
 psy_lbm_server_listen(psy_lbm_server_t* _server) {
   int fd;
 

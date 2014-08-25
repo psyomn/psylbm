@@ -15,11 +15,12 @@ void
 psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h, 
                        char* _message) {
   char delimiters[] = "|";
-  char *token;
+  char* token;
   int badrequest = 0;
+  char* dupped_message = strdup(_message);
 
   /* First token */
-  token = strtok(_message, delimiters);
+  token = strtok(dupped_message, delimiters);
 
   if (token == NULL) {
     /* Someone sent something empty in the first token (eg: "|||") */
@@ -33,16 +34,19 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
   }
 
   else if (!strcmp(token, "ins")) {
-    char *title   = strtok(NULL, delimiters), 
+    char *name    = strtok(NULL, delimiters),
+         *title   = strtok(NULL, delimiters), 
          *volume  = strtok(NULL, delimiters), 
          *chapter = strtok(NULL, delimiters), 
          *page    = strtok(NULL, delimiters),
          *token   = strtok(NULL, delimiters);
-    uint32_t i_vol  = atoi(volume);
-    uint32_t i_chap = atoi(chapter);
-    uint32_t i_page = atoi(page);
+
+    uint32_t i_vol  = atoi(volume),
+             i_chap = atoi(chapter),
+             i_page = atoi(page);
+
     printf("Received bookmark request [%s]-[%s]\n", title, token);
-    psy_lbm_handle_insert(_s, _h, title, i_vol, i_chap, i_page, token);
+    psy_lbm_handle_insert(_s, _h, name, title, i_vol, i_chap, i_page, token);
   }
 
   else if (!strcmp(token, "reg")) {
@@ -66,12 +70,11 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
     printf("Received malformed request [%s]\n", _message);
     _psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
   }
-
+  
+  free(dupped_message);
 }
 
-/*
- * provided a username and password generate a token, and send it back
- */
+/* provided a username and password generate a token, and send it back */
 char*
 psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
                              char* _username, char* _password) {
@@ -114,8 +117,9 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
  */
 int
 psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, 
-                      char* _title, uint32_t _vol, uint32_t _chapter, 
-                      uint32_t _page, char* _token) {
+                      char* _name, char* _title, uint32_t _vol, 
+                      uint32_t _chapter, uint32_t _page, char* _token) {
+  int ret;
   int32_t uid = psy_lbm_find_user_id_by_token(_s->db, _token);
 
   /* Problem */
@@ -124,10 +128,13 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h,
     return -1;
   }
 
-  psy_lbm_insert_bookmark(_s->db, uid, _title, _vol, 
+  ret = psy_lbm_insert_bookmark(_s->db, uid, _name, _title, _vol, 
                           _chapter, _page);
 
-  _psy_lbm_reply(_s, _h, PSYLBM_INS_OK);
+  if (!ret) 
+    _psy_lbm_reply(_s, _h, PSYLBM_INS_OK);
+  else 
+    _psy_lbm_reply(_s, _h, PSYLBM_INS_FAIL);
 
   return 0;
 }

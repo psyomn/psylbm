@@ -1,0 +1,6 @@
+TODO
+
+  * Named bookmarks
+  * server values should not be hardcoded (localhost, portnumber etc)
+  * Add name to a bookmark, so that if a user has multiple bookmarks on a single
+    book, the user would be able to discern the difference.

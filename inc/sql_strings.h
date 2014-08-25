@@ -9,12 +9,13 @@
 
 #define SQL_CREATE_BOOKMARKS \
   "create table bookmarks("\
-     "id INTEGER PRIMARY KEY AUTOINCREMENT, "\
+     "id      INTEGER PRIMARY KEY AUTOINCREMENT, "\
+     "name    TEXT UNIQUE,"\
      "user_id INTEGER,"\
-     "title TEXT,"\
-     "volume INTEGER,"\
+     "title   TEXT,"\
+     "volume  INTEGER,"\
      "chapter INTEGER,"\
-     "page INTEGER);"\
+     "page    INTEGER);"
 
 #define SQL_CREATE_API_TOKENS \
   "CREATE TABLE api_tokens("\
@@ -33,8 +34,9 @@
   "UPDATE api_tokens set token=? where user_id=?"
 
 #define SQL_INSERT_BOOKMARK \
-  "INSERT INTO bookmarks (user_id,title,volume,chapter,page)"\
-  " VALUES (?,?,?,?,?);"
+  "INSERT INTO bookmarks "\
+  "(user_id,name,title,volume,chapter,page)"\
+  " VALUES (?,?,?,?,?,?);"
  
 /* Find */
 #define SQL_FIND_USER_BY_ID \
@@ -48,6 +50,12 @@
 
 #define SQL_FIND_USER_BY_TOKEN \
   "SELECT user_id FROM api_tokens WHERE token = ?;"
+
+#define SQL_DELETE_BOOK \
+  "DELETE FROM bookmarks WHERE id = ?"
+
+#define SQL_PURGE_BOOKS \
+  "DELETE FROM bookmarks WHERE user_id = ?"
 
 #endif
 

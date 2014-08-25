@@ -27,6 +27,8 @@ start(void* data) {
   psy_lbm_print_server_info(server);
   psy_lbm_server_listen(server);
 
+  psy_lbm_free_server(server);
+
   pthread_exit(NULL);
 }
 

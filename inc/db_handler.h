@@ -23,7 +23,7 @@ psy_lbm_insert_user(sqlite3*, char*, char*);
 
 int
 psy_lbm_insert_bookmark(sqlite3*, uint32_t, char*, 
-  uint32_t, uint32_t, uint32_t);
+  char*, uint32_t, uint32_t, uint32_t);
 
 int
 psy_lbm_make_token(sqlite3*, uint32_t, char*);
