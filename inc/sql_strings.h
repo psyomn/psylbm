@@ -46,5 +46,8 @@
 #define SQL_FIND_BOOKMARKS_BY_USER_ID \
   "SELECT * FROM bookmarks WHERE user_id = ?;"
 
+#define SQL_FIND_USER_BY_TOKEN \
+  "SELECT user_id FROM api_tokens WHERE token = ?;"
+
 #endif
 
