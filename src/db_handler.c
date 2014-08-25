@@ -296,19 +296,23 @@ int32_t
 psy_lbm_find_user_id_by_token(sqlite3* _db, char* _token) {
   sqlite3_stmt* stmt = NULL;
   const char** t = NULL;
+  int ret;
   
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_TOKEN, sizeof(SQL_FIND_USER_BY_TOKEN), &stmt, t);
   sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_TRANSIENT);
 
-  if (sqlite3_step(stmt) != SQLITE_DONE) {
+  ret = sqlite3_step(stmt);
+
+  printf("%d\n", ret);
+
+  if (ret == SQLITE_ROW) {
+    int32_t id = sqlite3_column_int(stmt, 0);
     sqlite3_finalize(stmt);
-    perror("Problem finding user by id");
-    return -1;
+    return id;
   }
 
-  int32_t id = sqlite3_column_int(stmt, 0);
   sqlite3_finalize(stmt);
-
-  return id;
+  perror("Problem finding user by id");
+  return -1;
 }
 

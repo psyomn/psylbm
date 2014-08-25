@@ -33,7 +33,16 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
   }
 
   else if (!strcmp(token, "ins")) {
-    printf("received ins request\n");
+    char *title   = strtok(NULL, delimiters), 
+         *volume  = strtok(NULL, delimiters), 
+         *chapter = strtok(NULL, delimiters), 
+         *page    = strtok(NULL, delimiters),
+         *token   = strtok(NULL, delimiters);
+    uint32_t i_vol  = atoi(volume);
+    uint32_t i_chap = atoi(chapter);
+    uint32_t i_page = atoi(page);
+    printf("Received bookmark request [%s]-[%s]\n", title, token);
+    psy_lbm_handle_insert(_s, _h, title, i_vol, i_chap, i_page, token);
   }
 
   else if (!strcmp(token, "reg")) {
@@ -47,6 +56,7 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
       badrequest = 1;
     }
   }
+
   else {
     badrequest = 1;
   }
@@ -103,10 +113,22 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
  * new record is created.
  */
 int
-psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, char* _title, 
-                      uint32_t _vol, uint32_t _chapter, uint32_t _page, 
-                      char* _token) {
-  
+psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, 
+                      char* _title, uint32_t _vol, uint32_t _chapter, 
+                      uint32_t _page, char* _token) {
+  int32_t uid = psy_lbm_find_user_id_by_token(_s->db, _token);
+
+  /* Problem */
+  if (uid == -1) {
+    _psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
+    return -1;
+  }
+
+  psy_lbm_insert_bookmark(_s->db, uid, _title, _vol, 
+                          _chapter, _page);
+
+  _psy_lbm_reply(_s, _h, PSYLBM_INS_OK);
+
   return 0;
 }
 
@@ -173,4 +195,5 @@ psy_lbm_handle_error(char* _sent_stuff) {
 
   return 0;
 }
+
 
