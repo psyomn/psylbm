@@ -18,7 +18,7 @@ psy_lbm_handle_message(
   remote_host_t*, 
   char*);
 
-char*
+void
 psy_lbm_handle_authorization(
   psy_lbm_server_t*, 
   remote_host_t*, 

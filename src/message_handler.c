@@ -75,10 +75,9 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
 }
 
 /* provided a username and password generate a token, and send it back */
-char*
+void
 psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
                              char* _username, char* _password) {
-  char* ret  = NULL;
   char* hash = NULL;
   int salt;
   user_t* u = psy_lbm_find_user_by_name(_s->db, _username);
@@ -86,7 +85,7 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
   if (u == NULL) {
     /* No user found - send back fail message */
     _psy_lbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
-    return ret;
+    return;
   }
 
   salt = atoi(u->salt);
@@ -106,8 +105,6 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
 
   free(hash);
   psy_lbm_free_user(u);
-
-  return ret;
 }
 
 /* Send the book info (title, vol, chapter, page), and if the token is a valid
