@@ -3,9 +3,18 @@
 
 void
 psy_lbm_free_user(user_t* u){ 
-  if (u->name     != NULL) free(u->name);
-  if (u->password != NULL) free(u->password);
-  if (u->salt     != NULL) free(u->salt);
+  if (u == NULL) return;
+
+  if (u->name     != NULL) {
+    free(u->name);
+  }
+  if (u->password != NULL) {
+    free(u->password);
+  }
+  if (u->salt     != NULL) {
+    free(u->salt);
+  }
+
   free(u);
 }
 
