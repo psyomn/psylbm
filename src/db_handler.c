@@ -119,7 +119,7 @@ int
 psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
   sqlite3_stmt*  stmt = NULL;
   const char**   t = NULL;
-  char* hashed_password = NULL;
+  char*          hashed_password = NULL;
   user_t*        u = NULL;
   int            salt = time(0);
   char           salt_str[11];

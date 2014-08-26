@@ -7,7 +7,8 @@
 
 void
 _psy_lbm_reply(psy_lbm_server_t* _s, remote_host_t* _h, char* _message) {
-    sendto(_s->sock, _message, strlen(_message), 
+    sendto(_s->sock, 
+           _message, strlen(_message), 
            0, (struct sockaddr*)&_h->a, _h->l);
 }
 
@@ -142,6 +143,7 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h,
 int
 psy_lbm_handle_register(psy_lbm_server_t* _s, remote_host_t* _h, char* _user, 
                         char* _pass) {
+  int ret;
   int usr_l = strlen(_user), pass_l = strlen(_pass); 
   int lengths_ok = 
     usr_l > 0 && usr_l <= PSYLBM_USERNAME_LENGTH &&
@@ -152,7 +154,7 @@ psy_lbm_handle_register(psy_lbm_server_t* _s, remote_host_t* _h, char* _user,
     return -1;
   }
 
-  int ret = psy_lbm_insert_user(_s->db, _user, _pass);
+  ret = psy_lbm_insert_user(_s->db, _user, _pass);
 
   if (ret == -1) {
     /* Some problem with query */
