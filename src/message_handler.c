@@ -79,6 +79,12 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
     psy_lbm_handle_delete(_s, _h, i_bkid, token);
   }
 
+  else if (!strcmp(token, "purge")) {
+    char* token = strtok(NULL, delimiters);
+    printf("Processing purge request... [%s]\n", token);
+    psy_lbm_handle_purge(_s, _h, token);
+  }
+
   else {
     badrequest = 1;
   }
@@ -286,4 +292,20 @@ psy_lbm_handle_error(char* _sent_stuff) {
   return 0;
 }
 
+int 
+psy_lbm_handle_purge(psy_lbm_server_t* _s, remote_host_t* _h, char* _token) {
+  int ret = 0;
+  int32_t user_id = psy_lbm_find_user_id_by_token(_s->db, _token);
+  
+  if (user_id != -1) {
+    psy_lbm_purge_bookmarks(_s->db, user_id);
+    _psy_lbm_reply(_s, _h, PSYLBM_PURGE_OK);
+  }
+  else {
+    ret = -1; 
+    _psy_lbm_reply(_s, _h, PSYLBM_PURGE_FAIL);
+  }
+
+  return ret;
+}
 

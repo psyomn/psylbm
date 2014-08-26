@@ -118,7 +118,7 @@ psy_lbm_purge_bookmarks(sqlite3* _db, uint32_t _user_id) {
   sqlite3_prepare_v2(_db, SQL_PURGE_BOOKMARKS, sizeof(SQL_PURGE_BOOKMARKS),
     &stmt, t);
 
-  sqlite3_bind_int(stmt, 0, _user_id);
+  sqlite3_bind_int(stmt, 1, _user_id);
  
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     ret = -1;

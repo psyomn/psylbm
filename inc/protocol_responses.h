@@ -16,6 +16,10 @@
 #define PSYLBM_DEL_OK          PSYLBM_DEL "ok"
 #define PSYLBM_DEL_FAIL        PSYLBM_DEL "fail"
 
+#define PSYLBM_PURGE           "purge|"
+#define PSYLBM_PURGE_OK        PSYLBM_PURGE "ok"
+#define PSYLBM_PURGE_FAIL      PSYLBM_PURGE "fail"
+
 #define PSYLBM_SYNC            "sync|"
 
 #define PSYLBM_SERVER_ERROR    "server-error"
