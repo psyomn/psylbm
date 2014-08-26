@@ -80,7 +80,7 @@ SYNCHRONIZATION
   Sync request:
     <sync>|<token>
   Sync response: 
-    <bookmark-amount>
+    <sync>|<bookmark-amount>
 
   The above should be executed in order to get an amount of books to be
   received. This way the user of the protocol can somewhat troubleshoot if all
@@ -97,7 +97,9 @@ SYNCHRONIZATION
 
 MISUSE
 
-  (Mainly for malformed requests)
+  If the client sent something malformed, or something that makes no sense, a
+  <badrequest> is sent back. Might help client devs for debugging.
+
   Response:
     <badrequest>
 
