@@ -65,10 +65,10 @@
 #define SQL_FIND_USER_BY_TOKEN \
   "SELECT user_id FROM api_tokens WHERE token = ?;"
 
-#define SQL_DELETE_BOOK \
+#define SQL_DELETE_BOOKMARK \
   "DELETE FROM bookmarks WHERE id = ?"
 
-#define SQL_PURGE_BOOKS \
+#define SQL_PURGE_BOOKMARKSS \
   "DELETE FROM bookmarks WHERE user_id = ?"
 
 #endif

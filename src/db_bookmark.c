@@ -68,8 +68,7 @@ psy_lbm_find_bookmark_by_name(sqlite3* _db, char* _name) {
 
   sqlite3_bind_text(stmt, 1, _name, strlen(_name), SQLITE_STATIC);
 
-  if (sqlite3_step(stmt) != SQLITE_DONE) {
-    printf("Problem finding bookmark [%s]\n", _name);
+  if (sqlite3_step(stmt) != SQLITE_ROW) {
     return NULL;
   }
 
@@ -87,4 +86,26 @@ psy_lbm_find_bookmark_by_name(sqlite3* _db, char* _name) {
   return book;
 }
 
+int
+psy_lbm_delete_bookmark(sqlite3* _db, uint32_t _book_id) {
+  int ret = 0;
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
 
+  sqlite3_prepare_v2(_db, SQL_DELETE_BOOKMARK, sizeof(SQL_DELETE_BOOKMARK),
+    &stmt, t);
+
+  sqlite3_bind_int(stmt, 1, _book_id);
+
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    ret = -1;
+  }
+
+  return ret;
+}
+
+int
+psy_lbm_purge_bookmarks(sqlite3* _db, uint32_t _user_id) {
+
+  return 0;
+}
