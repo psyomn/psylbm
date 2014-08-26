@@ -88,12 +88,11 @@ psy_lbm_find_user_by_name(sqlite3* _db, char* _name) {
   int rc;
 
   u = psy_lbm_make_user();
-  u->name = strdup(_name);
 
   sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_NAME, 
                      sizeof(SQL_FIND_USER_BY_NAME), &stmt, t);
 
-  sqlite3_bind_text(stmt, 1, _name, strlen(u->name), SQLITE_STATIC);
+  sqlite3_bind_text(stmt, 1, _name, strlen(_name), SQLITE_STATIC);
 
   rc = sqlite3_step(stmt);
 
@@ -140,6 +139,7 @@ psy_lbm_insert_user(sqlite3* _db, char* _username, char* _password) {
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting user row");
+    free(hashed_password);
     sqlite3_finalize(stmt);
     return -1;
   }
@@ -197,6 +197,7 @@ psy_lbm_make_token(sqlite3* _db, uint32_t _user_id, char* _token) {
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     perror("Problem inserting api token");
+    sqlite3_finalize(stmt);
     return -1;
   }
 
@@ -226,13 +227,14 @@ psy_lbm_set_token(sqlite3* _db, uint32_t _user_id, char* _token) {
 /** Search user by name. return 0 on not found, else 1 */
 int 
 _psy_lbm_user_exists(sqlite3* _db, char* _name) {
-  user_t* u = psy_lbm_find_user_by_name(_db, _name);
+  int ret;
+  user_t* u = NULL; 
 
-  if (u == NULL) 
-    return 0;
-
+  u   = psy_lbm_find_user_by_name(_db, _name);
+  ret = (u == NULL ? 0 : 1);
   psy_lbm_free_user(u);
-  return 1;
+
+  return ret;
 }
 
 /*
