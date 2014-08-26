@@ -40,12 +40,15 @@ INSERT
   order to discern it from other bookmarks (for example, same bookmark on same
   book, page, chapter, volume, but different names).
 
+  In an insert request, if an id is specified, it means that we wish to update a
+  <bookmark-name> in that given request.
+
   <bookmark> ::= <bookmark-name>|<book-title>|<volume>|<chapter>|<page>
   
   Insert request:
-    <ins>|<bookmark>|<token>
+    <ins>|<bookmark>|<token>[|<id>]
   Insert response (success):
-    <ins>|<ok>
+    <ins>|<ok>|<id>
   Insert response (failure):
     <ins>|<fail>
 
