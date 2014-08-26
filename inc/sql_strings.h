@@ -12,8 +12,8 @@
 #define SQL_CREATE_BOOKMARKS \
   "create table bookmarks("\
      "id      INTEGER PRIMARY KEY AUTOINCREMENT, "\
-     "name    TEXT UNIQUE,"\
      "user_id INTEGER,"\
+     "name    TEXT UNIQUE,"\
      "title   TEXT,"\
      "volume  INTEGER,"\
      "chapter INTEGER,"\
@@ -39,6 +39,14 @@
   "INSERT INTO bookmarks "\
   "(user_id,name,title,volume,chapter,page)"\
   " VALUES (?,?,?,?,?,?);"
+
+#define SQL_UPDATE_BOOKMARK_VALUES \
+  "UPDATE bookmarks SET "\
+  "name    = ? , "\
+  "title   = ? , "\
+  "volume  = ? , "\
+  "chapter = ? , "\
+  "page    = ?;"
  
 /* Find */
 #define SQL_FIND_USER_BY_ID \
