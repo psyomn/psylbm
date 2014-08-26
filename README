@@ -11,6 +11,18 @@ PSYLIGHTBOOKMARK
   implement something in their own application. If you're interested, see the
   file PROTOCOL.
 
+COMPILING
+
+  You can compile in debug mode with: 
+
+    mkdir -p build/debug
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+
+  And similarly for release:
+
+    mkdir -p build/release
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+
 AUTHORS
 
   Simon (psyomn) Symeonidis (2014)
