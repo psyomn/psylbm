@@ -61,6 +61,12 @@ psy_lbm_handle_purge(
   remote_host_t*,
   char*);
 
+int
+psy_lbm_handle_sync(
+  psy_lbm_server_t*,
+  remote_host_t*,
+  char*);
+
 /* Logging */
 int
 psy_lbm_handle_error(char*);

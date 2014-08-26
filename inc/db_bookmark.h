@@ -37,5 +37,8 @@ psy_lbm_delete_bookmark(sqlite3*, uint32_t);
 int
 psy_lbm_purge_bookmarks(sqlite3*, uint32_t);
 
+uint32_t
+psy_lbm_count_user_bookmarks(sqlite3*, uint32_t);
+
 #endif
 

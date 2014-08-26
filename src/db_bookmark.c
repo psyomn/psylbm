@@ -3,7 +3,7 @@
 
 int
 psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _name, char* _title,
-  uint32_t _volume, uint32_t _chapter, uint32_t _page) {
+                        uint32_t _volume, uint32_t _chapter, uint32_t _page) {
   sqlite3_stmt* stmt = NULL;
   const char** t = NULL;
   
@@ -156,6 +156,28 @@ psy_lbm_find_bookmark(sqlite3* _db, uint32_t _bm_id) {
   sqlite3_finalize(stmt);
 
   return book;
-};
+}
 
+uint32_t
+psy_lbm_count_user_bookmarks(sqlite3* _db, uint32_t _user_id) {
+  int stat;
+  uint32_t count = 0;
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
+
+  sqlite3_prepare_v2(_db, SQL_COUNT_USER_BOOKMARKS,
+    sizeof(SQL_COUNT_USER_BOOKMARKS), &stmt, t);
+
+  sqlite3_bind_int(stmt, 1, _user_id);
+  stat = sqlite3_step(stmt);
+
+  if (stat == SQLITE_ROW) 
+    count = sqlite3_column_int(stmt, 0);
+  else 
+    printf("Problem counting bookmarks\n");
+
+  sqlite3_finalize(stmt);
+
+  return count;
+}
 

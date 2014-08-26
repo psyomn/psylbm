@@ -85,6 +85,12 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
     psy_lbm_handle_purge(_s, _h, token);
   }
 
+  else if (!strcmp(token, "sync")) {
+    char* token = strtok(NULL, delimiters);
+    printf("Sync request from [%s]\n", token);
+    psy_lbm_handle_sync(_s, _h, token);
+  }
+
   else {
     badrequest = 1;
   }
@@ -309,3 +315,28 @@ psy_lbm_handle_purge(psy_lbm_server_t* _s, remote_host_t* _h, char* _token) {
   return ret;
 }
 
+int
+psy_lbm_handle_sync(psy_lbm_server_t* _s, remote_host_t* _h, char* _token) {
+  int ret = 0;
+  int32_t user_id = psy_lbm_find_user_id_by_token(_s->db, _token);
+  uint32_t count;
+  char reply[128];
+  char countstr[64];
+
+  if (user_id == -1) {
+    printf("Problem syncing - no such user...\n");
+    _psy_lbm_reply(_s, _h, PSYLBM_SYNC_FAIL);
+    return -1;
+  }
+
+  count = psy_lbm_count_user_bookmarks(_s->db, user_id);
+  memset(countstr, 0, sizeof(countstr));
+  memset(reply, 0, sizeof(reply));
+
+  sprintf(countstr, "%d", count);
+  strcpy(reply, PSYLBM_SYNC);
+  strcat(reply, countstr);
+  _psy_lbm_reply(_s, _h, reply);
+
+  return ret;
+}
