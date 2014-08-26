@@ -15,4 +15,6 @@
 #include <stddef.h>
 #include <time.h>
 
+#include <openssl/sha.h>
+
 #endif 

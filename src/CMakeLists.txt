@@ -10,6 +10,9 @@ main.c
 server.c
 message_handler.c
 db_handler.c
+db_bookmark.c
+db_token.c
+db_user.c
 domain.c
 )
 
