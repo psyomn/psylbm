@@ -26,6 +26,37 @@ psy_lbm_insert_bookmark(sqlite3* _db, uint32_t _user_id, char* _name, char* _tit
   return 0;
 }
 
+int
+psy_lbm_update_bookmark(sqlite3* _db, char* _name, 
+                        char* _title, uint32_t _volume, uint32_t _chapter, 
+                        uint32_t _page ) {
+  int ret = 0;
+  bookmark_t* bm = NULL;
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL;
+  
+  bm = psy_lbm_find_bookmark_by_name(_db, _name);
+
+  sqlite3_prepare_v2(_db, SQL_UPDATE_BOOKMARK_VALUES, 
+    sizeof(SQL_UPDATE_BOOKMARK_VALUES), &stmt, t);
+
+  sqlite3_bind_text(stmt, 1, _name, strlen(_name), SQLITE_STATIC);
+  sqlite3_bind_text(stmt, 2, _title, strlen(_title), SQLITE_STATIC);
+  sqlite3_bind_int(stmt, 3, _volume);
+  sqlite3_bind_int(stmt, 4, _chapter);
+  sqlite3_bind_int(stmt, 5, _page);
+  sqlite3_bind_int(stmt, 6, bm->id);
+
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    printf("Error updating bookmark\n");
+    ret = -1;
+  }
+  
+  psy_lbm_free_bookmark(bm);
+  sqlite3_finalize(stmt);
+  return ret;
+}
+
 bookmark_t*
 psy_lbm_find_bookmark_by_name(sqlite3* _db, char* _name) {
   bookmark_t* book = NULL;
@@ -55,4 +86,5 @@ psy_lbm_find_bookmark_by_name(sqlite3* _db, char* _name) {
 
   return book;
 }
+
 

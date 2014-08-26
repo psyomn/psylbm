@@ -119,20 +119,34 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h,
                       uint32_t _chapter, uint32_t _page, char* _token) {
   int ret;
   int32_t uid = psy_lbm_find_user_id_by_token(_s->db, _token);
+  bookmark_t* bm = NULL;
 
-  /* Problem */
+  /* No such user */
   if (uid == -1) {
     _psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
     return -1;
   }
 
-  ret = psy_lbm_insert_bookmark(_s->db, uid, _name, _title, _vol, 
-                          _chapter, _page);
+  /* Does the previous bookmark exist? */
+  bm = psy_lbm_find_bookmark_by_name(_s->db, _name);
+
+  if (bm == NULL) {
+    /* No such bookmark - inset */
+    ret = psy_lbm_insert_bookmark(
+      _s->db, uid, _name, _title, _vol, _chapter, _page);
+  }
+  else {
+    /* Found bookmark - update */
+    ret = psy_lbm_update_bookmark(
+      _s->db, _name, _title, _vol, _chapter, _page);
+  }
 
   if (!ret) 
     _psy_lbm_reply(_s, _h, PSYLBM_INS_OK);
   else 
     _psy_lbm_reply(_s, _h, PSYLBM_INS_FAIL);
+
+  psy_lbm_free_bookmark(bm);
 
   return 0;
 }

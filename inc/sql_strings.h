@@ -46,7 +46,8 @@
   "title   = ? , "\
   "volume  = ? , "\
   "chapter = ? , "\
-  "page    = ?;"
+  "page    = ? "\
+  "WHERE id = ?;"
  
 /* Find */
 #define SQL_FIND_USER_BY_ID \
