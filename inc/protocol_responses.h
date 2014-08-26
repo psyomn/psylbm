@@ -9,7 +9,7 @@
 #define PSYLBM_AUTH_FAIL       PSYLBM_AUTH "fail"
 
 #define PSYLBM_INS             "ins|"
-#define PSYLBM_INS_OK          PSYLBM_INS "ok"
+#define PSYLBM_INS_OK          PSYLBM_INS "ok|"
 #define PSYLBM_INS_FAIL        PSYLBM_INS "fail"
 
 #define PSYLBM_SYNC            "sync|"

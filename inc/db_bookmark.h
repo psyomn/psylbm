@@ -21,17 +21,19 @@ psy_lbm_update_bookmark(
   char*, 
   uint32_t, 
   uint32_t, 
+  uint32_t,
   uint32_t);
 
 bookmark_t*
 psy_lbm_find_bookmark_by_name(sqlite3*, char*);
 
+bookmark_t*
+psy_lbm_find_bookmark(sqlite3*, uint32_t);
+
 int
 psy_lbm_delete_bookmark(sqlite3*, uint32_t);
 
-/*
-** Given a user id, delete all the rows with that user id of bookmarks
-*/
+/* Given a user id, delete all the rows with that user id of bookmarks */
 int
 psy_lbm_purge_bookmarks(sqlite3*, uint32_t);
 

@@ -40,14 +40,20 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
          *volume  = strtok(NULL, delimiters), 
          *chapter = strtok(NULL, delimiters), 
          *page    = strtok(NULL, delimiters),
-         *token   = strtok(NULL, delimiters);
+         *token   = strtok(NULL, delimiters),
+         *book_id = strtok(NULL, delimiters);
 
     uint32_t i_vol  = atoi(volume),
              i_chap = atoi(chapter),
-             i_page = atoi(page);
+             i_page = atoi(page),
+             i_bkid = 0;
+
+    if (book_id != NULL)
+      i_bkid = atoi(book_id);
 
     printf("Received bookmark request [%s]-[%s]\n", title, token);
-    psy_lbm_handle_insert(_s, _h, name, title, i_vol, i_chap, i_page, token);
+    psy_lbm_handle_insert(_s, _h, name, title, i_vol, i_chap, i_page, token,
+      i_bkid);
   }
 
   else if (!strcmp(token, "reg")) {
@@ -116,7 +122,8 @@ psy_lbm_handle_authorization(psy_lbm_server_t* _s, remote_host_t* _h,
 int
 psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h, 
                       char* _name, char* _title, uint32_t _vol, 
-                      uint32_t _chapter, uint32_t _page, char* _token) {
+                      uint32_t _chapter, uint32_t _page, char* _token,
+                      uint32_t _bookmark_id) {
   int ret;
   int32_t uid = psy_lbm_find_user_id_by_token(_s->db, _token);
   bookmark_t* bm = NULL;
@@ -127,22 +134,35 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h,
     return -1;
   }
 
-  /* Does the previous bookmark exist? */
-  bm = psy_lbm_find_bookmark_by_name(_s->db, _name);
+  if (_bookmark_id == 0) {
+    /* No id given - Does the previous bookmark exist? */
+    bm = psy_lbm_find_bookmark_by_name(_s->db, _name);
+  }
+  else {
+    bm = psy_lbm_find_bookmark(_s->db, _bookmark_id);
+  }
 
   if (bm == NULL) {
     /* No such bookmark - inset */
     ret = psy_lbm_insert_bookmark(
       _s->db, uid, _name, _title, _vol, _chapter, _page);
+    bm = psy_lbm_find_bookmark_by_name(_s->db, _name);
   }
   else {
     /* Found bookmark - update */
     ret = psy_lbm_update_bookmark(
-      _s->db, _name, _title, _vol, _chapter, _page);
+      _s->db, _name, _title, _vol, _chapter, _page, _bookmark_id);
   }
 
-  if (!ret) 
-    _psy_lbm_reply(_s, _h, PSYLBM_INS_OK);
+  if (!ret) {
+    char reply[128];
+    char idstr[64];
+    sprintf(idstr, "%d", bm->id);
+    memset(reply, 0, sizeof(reply));
+    strcpy(reply, PSYLBM_INS_OK);
+    strcat(reply, idstr);
+    _psy_lbm_reply(_s, _h, reply);
+  }
   else 
     _psy_lbm_reply(_s, _h, PSYLBM_INS_FAIL);
 

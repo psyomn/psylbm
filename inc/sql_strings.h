@@ -62,13 +62,16 @@
 #define SQL_FIND_BOOKMARK_BY_NAME \
   "SELECT * FROM bookmarks WHERE name = ?"
 
+#define SQL_FIND_BOOKMARK \
+  "SELECT * FROM bookmarks WHERE id = ?"
+
 #define SQL_FIND_USER_BY_TOKEN \
   "SELECT user_id FROM api_tokens WHERE token = ?;"
 
 #define SQL_DELETE_BOOKMARK \
   "DELETE FROM bookmarks WHERE id = ?"
 
-#define SQL_PURGE_BOOKMARKSS \
+#define SQL_PURGE_BOOKMARKS \
   "DELETE FROM bookmarks WHERE user_id = ?"
 
 #endif
