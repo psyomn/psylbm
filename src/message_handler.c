@@ -57,6 +57,7 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
   }
 
   else if (!strcmp(token, "reg")) {
+    /* Register user */
     char* user = strtok(NULL, delimiters);
     char* pass = strtok(NULL, delimiters);
     printf("Registration request [%s]\n", user);
@@ -66,6 +67,16 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
     else {
       badrequest = 1;
     }
+  }
+
+  else if (!strcmp(token, "del")) {
+    /* Delete a bookmark */
+    char *bookmark_id = strtok(NULL, delimiters),
+         *token       = strtok(NULL, delimiters);
+    uint32_t i_bkid = atoi(bookmark_id);
+    
+    printf("Delete request [%d]-[%s]\n", i_bkid, token);
+    psy_lbm_handle_delete(_s, _h, i_bkid, token);
   }
 
   else {
@@ -169,6 +180,45 @@ psy_lbm_handle_insert(psy_lbm_server_t* _s, remote_host_t* _h,
   psy_lbm_free_bookmark(bm);
 
   return 0;
+}
+
+int
+psy_lbm_handle_delete(psy_lbm_server_t* _s, remote_host_t* _h, uint32_t _bkid,
+                      char* _token) {
+  bookmark_t* bm = NULL;
+  int32_t user_id = -1;
+  int ret = 0;
+
+  user_id = psy_lbm_find_user_id_by_token(_s->db, _token);
+  bm = psy_lbm_find_bookmark(_s->db, _bkid);
+
+  if (bm && bm->user_id == user_id) {
+    /* Authorization ok */
+    printf("Deleting...\n");
+    if (psy_lbm_delete_bookmark(_s->db, _bkid) == 0) {
+      _psy_lbm_reply(_s, _h, PSYLBM_DEL_OK);
+    }
+    else {
+      _psy_lbm_reply(_s, _h, PSYLBM_DEL_FAIL);
+    }
+  }
+  else if (!bm) {
+    /* TODO log me */
+    ret = -1;
+    printf("Tried to delete non-existant bookmark\n");
+  }
+  else {
+    ret = -1;
+    printf("Unauthorized delete request\n"); /* TODO this should be logged */
+  }
+
+  if (ret != 0) {
+    _psy_lbm_reply(_s, _h, PSYLBM_DEL_FAIL);
+  }
+
+  psy_lbm_free_bookmark(bm);
+
+  return ret;
 }
 
 /*

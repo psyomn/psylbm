@@ -12,6 +12,10 @@
 #define PSYLBM_INS_OK          PSYLBM_INS "ok|"
 #define PSYLBM_INS_FAIL        PSYLBM_INS "fail"
 
+#define PSYLBM_DEL             "del|"
+#define PSYLBM_DEL_OK          PSYLBM_DEL "ok"
+#define PSYLBM_DEL_FAIL        PSYLBM_DEL "fail"
+
 #define PSYLBM_SYNC            "sync|"
 
 #define PSYLBM_SERVER_ERROR    "server-error"

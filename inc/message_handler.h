@@ -35,6 +35,14 @@ psy_lbm_handle_insert(
   uint32_t);
 
 int
+psy_lbm_handle_delete(
+  psy_lbm_server_t*,
+  remote_host_t*,
+  uint32_t, 
+  char*
+);
+
+int
 psy_lbm_handle_register(
   psy_lbm_server_t*, 
   remote_host_t*, 

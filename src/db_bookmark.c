@@ -95,10 +95,11 @@ psy_lbm_delete_bookmark(sqlite3* _db, uint32_t _book_id) {
   sqlite3_stmt* stmt = NULL;
   const char** t = NULL;
 
+  printf("Delete bookmark with id: [%d]\n", _book_id);
   sqlite3_prepare_v2(_db, SQL_DELETE_BOOKMARK, sizeof(SQL_DELETE_BOOKMARK),
     &stmt, t);
 
-  sqlite3_bind_int(stmt, 0, _book_id);
+  sqlite3_bind_int(stmt, 1, _book_id);
 
   if (sqlite3_step(stmt) != SQLITE_DONE) {
     ret = -1;
@@ -156,3 +157,5 @@ psy_lbm_find_bookmark(sqlite3* _db, uint32_t _bm_id) {
 
   return book;
 };
+
+
