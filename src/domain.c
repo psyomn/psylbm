@@ -27,3 +27,24 @@ psy_lbm_make_user() {
   u->salt     = NULL;
   return u;
 }
+
+void
+psy_lbm_free_bookmark(bookmark_t* _b){
+  if (_b == NULL) return;
+  if (_b->name  != NULL) free(_b->name);
+  if (_b->title != NULL) free(_b->title);
+  free(_b);
+}
+
+bookmark_t*
+psy_lbm_make_bookmark() {
+  bookmark_t* b = malloc(sizeof(bookmark_t));
+  b->id = 0;
+  b->user_id = 0;
+  b->name = NULL;
+  b->title = NULL;
+  b->volume = 0;
+  b->chapter = 0;
+  b->page = 0;
+  return b;
+}
