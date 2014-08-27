@@ -71,5 +71,8 @@ psy_lbm_handle_sync(
 int
 psy_lbm_handle_error(char*);
 
+int
+psy_lbm_handle_syncdata(psy_lbm_server_t*, remote_host_t*, char*);
+
 #endif
 

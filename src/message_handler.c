@@ -4,6 +4,7 @@
 #include <message_handler.h>
 #include <common.h>
 #include <protocol_responses.h>
+#include <sql_strings.h>
 
 void
 _psy_lbm_reply(psy_lbm_server_t* _s, remote_host_t* _h, char* _message) {
@@ -89,6 +90,12 @@ psy_lbm_handle_message(psy_lbm_server_t* _s, remote_host_t* _h,
     char* token = strtok(NULL, delimiters);
     printf("Sync request from [%s]\n", token);
     psy_lbm_handle_sync(_s, _h, token);
+  }
+  
+  else if (!strcmp(token, "syncdata")) {
+    char* token = strtok(NULL, delimiters);
+    printf("Syncdata request from [%s]\n", token);
+    psy_lbm_handle_syncdata(_s, _h, token);
   }
 
   else {
@@ -340,3 +347,64 @@ psy_lbm_handle_sync(psy_lbm_server_t* _s, remote_host_t* _h, char* _token) {
 
   return ret;
 }
+
+/** 
+ * Usually it's better to separate db calls to another function, but for the
+ * sake of simplicity, and not relying on quite a bit of memory, we'll bundle
+ * the row-iteration on this function 
+ */
+int
+psy_lbm_handle_syncdata(psy_lbm_server_t* _s, remote_host_t* _h, char* _token) {
+  bookmark_t* book  = NULL;
+  int ret         = 0; 
+  int32_t user_id = psy_lbm_find_user_id_by_token(_s->db, _token);
+  sqlite3_stmt* stmt = NULL;
+  const char** t = NULL; 
+  char reply[1024];
+
+  if (user_id == -1) {
+    printf("Syncdata error: no such user [%d]\n", user_id);
+    ret = -1;
+    _psy_lbm_reply(_s, _h, PSYLBM_SYNCDATA_FAIL);
+    return ret;
+  }
+
+  /* Everything ok - iterate through rows */
+
+  book = psy_lbm_make_bookmark();
+
+  sqlite3_prepare_v2(_s->db, SQL_FIND_BOOKMARKS_BY_USER_ID, 
+    sizeof(SQL_FIND_BOOKMARKS_BY_USER_ID), &stmt, t);
+
+  sqlite3_bind_int(stmt, 1, user_id);
+
+  while (sqlite3_step(stmt) == SQLITE_ROW) {
+    book->id      = sqlite3_column_int(stmt, 0);
+    book->user_id = sqlite3_column_int(stmt, 1);
+    book->name    = (char*) sqlite3_column_text(stmt, 2);
+    book->title   = (char*) sqlite3_column_text(stmt, 3);
+    book->volume  = sqlite3_column_int(stmt, 4);
+    book->chapter = sqlite3_column_int(stmt, 5);
+    book->page    = sqlite3_column_int(stmt, 6);
+    
+    printf(">>");
+    printf("Sync bookmark with id [%d] for [%s]\n", book->id, _token);
+
+    memset(reply, 0, sizeof(reply));
+    sprintf(reply, "%d|%s|%s|%d|%d|%d",
+      book->id, book->name, book->title, book->volume,
+      book->chapter, book->page);
+    _psy_lbm_reply(_s, _h, reply);
+
+  }
+
+  /* Since we're not dupping in this case, above */
+  book->name = NULL;
+  book->title = NULL;
+
+  psy_lbm_free_bookmark(book);
+  sqlite3_finalize(stmt);
+  printf("Done with syncdata...\n");
+  return ret;
+}
+

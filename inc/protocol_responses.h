@@ -23,6 +23,8 @@
 #define PSYLBM_SYNC            "sync|"
 #define PSYLBM_SYNC_FAIL       "sync|fail"
 
+#define PSYLBM_SYNCDATA_FAIL   "syncdata|fail"
+
 #define PSYLBM_SERVER_ERROR    "server-error"
 #define PSYLBM_BAD_REQUEST     "bad-request"
 
