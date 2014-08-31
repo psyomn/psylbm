@@ -4,3 +4,6 @@ TODO
   * server values should not be hardcoded (localhost, portnumber etc)
   * Add name to a bookmark, so that if a user has multiple bookmarks on a single
     book, the user would be able to discern the difference.
+  * Think of a way to make password resets possible.
+  * Maybe allow other people to view your bookmarks if you want (using a 'set'
+    command in the protocol or something like that).
