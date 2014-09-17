@@ -13,7 +13,10 @@ psy_lbm_check_db() {
   if (!fd) {
     /* db dne, so make db */
     psy_lbm_make_db();
+    return;
   }
+
+  fclose(fd);
 }
 
 void
