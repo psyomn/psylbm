@@ -1,0 +1,27 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: "59 11 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: setup deps
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc cmake libsqlite3-dev
+    - name: isolate build
+      run: mkdir build
+    - name: build the thing
+      working-directory: ./build
+      run: |
+        cmake ..
+        make
