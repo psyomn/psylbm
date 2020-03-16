@@ -17,7 +17,7 @@ jobs:
     - name: setup deps
       run: |
         sudo apt-get update
-        sudo apt-get install gcc cmake libsqlite3-dev
+        sudo apt-get install gcc cmake libsqlite3-dev uncrustify
     - name: isolate build
       run: mkdir build
     - name: build the thing
@@ -25,3 +25,6 @@ jobs:
       run: |
         cmake ..
         make
+    - name: lint
+      working-directory: ./build
+      run: make check-format
