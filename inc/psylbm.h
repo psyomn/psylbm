@@ -5,4 +5,4 @@
 #define PSYLBM_PASSWORD_LENGTH 50
 #define PSYLBM_TITLE_LENGTH    200
 
-#endif
+#endif // ifndef PSYLBM_H

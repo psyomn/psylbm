@@ -17,4 +17,4 @@
 
 #include <openssl/sha.h>
 
-#endif 
+#endif // ifndef COMMON_H

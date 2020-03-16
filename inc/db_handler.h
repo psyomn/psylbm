@@ -11,11 +11,7 @@
 
 #define PSYLBM_DB_NAME "psylbm-db.sqlite3"
 
-void
-psy_lbm_check_db();
+void psy_lbm_check_db();
+void psy_lbm_make_db();
 
-void
-psy_lbm_make_db();
-
-#endif
-
+#endif // ifndef DB_HANDLER_H

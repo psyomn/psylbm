@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8) 
+cmake_minimum_required(VERSION 2.8)
 project(psylbm)
 
 subdirs(src)
@@ -18,4 +18,14 @@ find_package(Sqlite3 REQUIRED sqlite3)
 find_package(Threads)
 find_package(OpenSSL REQUIRED)
 
+add_custom_target(
+  format
+    COMMAND
+    uncrustify -c ${CMAKE_SOURCE_DIR}/uncrustify.cfg --no-backup ${CMAKE_SOURCE_DIR}/**/*.c ${CMAKE_SOURCE_DIR}/inc/*.h
+  )
 
+add_custom_target(
+  check-format
+    COMMAND
+    uncrustify -c ${CMAKE_SOURCE_DIR}/uncrustify.cfg --check ${CMAKE_SOURCE_DIR}/**/*.c ${CMAKE_SOURCE_DIR}/inc/*.h
+  )
