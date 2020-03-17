@@ -9,7 +9,6 @@
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <string.h>
 #include <stddef.h>
 #include <time.h>

@@ -5,35 +5,24 @@
 void *start(void *data);
 void init();
 
-int  main(int argc, char *argv[])
-{
-	static pthread_t __main_thread;
-	static void *__main_thread_status;
+// 0x505359
 
-	/* Init psylbm */
+int main(int argc, char *argv[])
+{
 	init();
 
-	/* Start the neverending listen of server */
-	pthread_create(&__main_thread, NULL, start, NULL);
-	pthread_join(__main_thread, __main_thread_status);
-	return 0;
-}
-
-void *start(void *data)
-{
 	psy_lbm_server_t *server = NULL;
 
-	server = psy_lbm_make_server(8080, "localhost");
+	server = psy_lbm_make_server(8080, "127.0.0.1");
 
 	psy_lbm_print_server_info(server);
 	psy_lbm_server_listen(server);
 
 	psy_lbm_free_server(server);
 
-	pthread_exit(NULL);
+	return 0;
 }
 
-/* Any needed init goes here */
 void init()
 {
 	srand(time(NULL));
