@@ -20,11 +20,18 @@ jobs:
         sudo apt-get install gcc cmake libsqlite3-dev uncrustify
     - name: isolate build
       run: mkdir build
-    - name: build the thing
+    - name: generate build environment
       working-directory: ./build
       run: |
         cmake ..
+    - name: make the project
+      working-directory: ./build
+      run: |
         make
+    - name: test
+      working-directory: ./build
+      run: |
+        make test
     - name: lint
       working-directory: ./build
       run: make check-format
