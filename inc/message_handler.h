@@ -1,5 +1,4 @@
-#ifndef PSYLBM_MESSAGE_HANDLER_H
-#define PSYLBM_MESSAGE_HANDLER_H
+#pragma once
 
 #include <common.h>
 
@@ -39,9 +38,6 @@ int psy_lbm_handle_purge(psy_lbm_server_t *, remote_host_t *, char *);
 
 int psy_lbm_handle_sync(psy_lbm_server_t *, remote_host_t *, char *);
 
-/* Logging */
 int psy_lbm_handle_error(char *);
 
 int psy_lbm_handle_syncdata(psy_lbm_server_t *, remote_host_t *, char *);
-
-#endif // ifndef PSYLBM_MESSAGE_HANDLER_H

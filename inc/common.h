@@ -1,5 +1,4 @@
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
 #include <stdint.h>
 
@@ -16,5 +15,3 @@
 #include <time.h>
 
 #include <openssl/sha.h>
-
-#endif // ifndef COMMON_H

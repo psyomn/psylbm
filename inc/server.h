@@ -1,5 +1,4 @@
-#ifndef SERVER_H
-#define SERVER_H
+#pragma once
 
 #include <stdint.h>
 #include <sqlite3.h>
@@ -32,6 +31,3 @@ void psy_lbm_free_server(psy_lbm_server_t *);
 void psy_lbm_server_listen(psy_lbm_server_t *);
 void psy_lbm_print_server_info(psy_lbm_server_t *);
 char *psy_lbm_server_status(psy_lbm_server_t *);
-
-
-#endif // ifndef SERVER_H

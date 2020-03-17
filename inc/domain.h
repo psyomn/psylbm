@@ -1,9 +1,6 @@
-#ifndef DOMAIN_H
-#define DOMAIN_H
+#pragma once
 
 #include <common.h>
-
-/* Domain structures that are representations of tha table schemass */
 
 struct user {
 	uint32_t	id;
@@ -40,5 +37,3 @@ void      psy_lbm_free_user(user_t *);
 user_t *psy_lbm_make_user();
 bookmark_t *psy_lbm_make_bookmark();
 void      psy_lbm_free_bookmark(bookmark_t *);
-
-#endif // ifndef DOMAIN_H
