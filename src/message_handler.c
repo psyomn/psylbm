@@ -25,7 +25,6 @@ void psy_lbm_handle_message(psy_lbm_server_t *_s, remote_host_t *_h,
 	token = strtok(dupped_message, delimiters);
 
 	if (token == NULL)
-		/* Someone sent something empty in the first token (eg: "|||") */
 		token = "badrequest";
 
 	if (!strcmp(token, "auth")) {
@@ -57,10 +56,8 @@ void psy_lbm_handle_message(psy_lbm_server_t *_s, remote_host_t *_h,
 		char *pass = strtok(NULL, delimiters);
 		printf("Registration request [%s]\n", user);
 
-		if ((user != NULL) && (pass != NULL)) psy_lbm_handle_register(_s,
-									      _h,
-									      user,
-									      pass);
+		if ((user != NULL) && (pass != NULL))
+			psy_lbm_handle_register(_s, _h, user, pass);
 		else
 			badrequest = 1;
 	} else if (!strcmp(token, "del")) {
@@ -237,16 +234,11 @@ int psy_lbm_handle_register(psy_lbm_server_t *_s, remote_host_t *_h, char *_user
 	ret = psy_lbm_insert_user(_s->db, _user, _pass);
 
 	if (ret == -1) {
-		/* Some problem with query */
 		_psy_lbm_reply(_s, _h, PSYLBM_SERVER_ERROR);
 	} else if (ret == -2) {
-		/* User already exist */
 		_psy_lbm_reply(_s, _h, PSYLBM_USERNAME_TAKEN);
 		printf("--| Username [%s] has been taken.\n", _user); /* TODO: logme */
 	} else {
-		/* Everything ok */
-		_psy_lbm_reply(_s, _h, PSYLBM_REGISTRATION_OK);
-		printf("--| Username [%s] registered.\n", _user); /* TODO: logme */
 	}
 
 	return 0;

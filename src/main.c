@@ -5,8 +5,6 @@
 void *start(void *data);
 void init();
 
-// 0x505359
-
 int main(int argc, char *argv[])
 {
 	init();
