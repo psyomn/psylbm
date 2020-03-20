@@ -17,7 +17,7 @@ jobs:
     - name: setup deps
       run: |
         sudo apt-get update
-        sudo apt-get install gcc cmake libsqlite3-dev uncrustify
+        sudo apt-get install gcc cmake libsqlite3-dev uncrustify valgrind
     - name: isolate build
       run: mkdir build
     - name: generate build environment

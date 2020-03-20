@@ -11,7 +11,7 @@ set(psylbm_SOURCES
   domain.c
   protocol.c)
 
-add_library(psylbm STATIC ${psylbm_SOURCES})
+add_library(psylbm SHARED ${psylbm_SOURCES})
 
 set(EXECUTABLE_NAME "psylbm-server")
 
