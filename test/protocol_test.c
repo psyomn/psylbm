@@ -96,6 +96,26 @@ static int insert_message_test(void)
 	return 0;
 }
 
+static int insert_message_corrupted_test(void)
+{
+  const char *data[] = {
+    "ins|bookmark name|book title|1|2|10|",
+    "ins|bookmark name|book title|1|2|10",
+    "ins|bookmark name|book title|1|2|",
+    "ins|bookmark name|book title|1|2",
+    "ins|bookmark name|book title|1|",
+    "ins|bookmark name|book title|1",
+    "ins|bookmark name|book title|",
+    "ins|bookmark name|book title",
+    "ins|bookmark name|",
+    "ins|",
+    "ins",
+    "",
+    "completely irrelevant"
+  };
+  return 1; // not implemented yet
+}
+
 static int update_message_test(void)
 {
 	const char *data = "ins|bookmark name|book-title|volume|chapter|page|TOKEN|10";
