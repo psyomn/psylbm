@@ -22,10 +22,22 @@ user_t *psy_lbm_find_user(sqlite3 *_db, uint32_t _id)
 	rc = sqlite3_step(stmt);
 
 	if (rc == SQLITE_ROW) {
+		const unsigned char *bookmark_name_uc = sqlite3_column_text(stmt, 1);
+		const int bookmark_name_uc_size = sqlite3_column_bytes(stmt, 1);
+		char *converted_bookmark_name = psylbm_strndup(bookmark_name_uc, bookmark_name_uc_size);
+
+		const unsigned char *password_uc = sqlite3_column_text(stmt, 2);
+		const int password_uc_size = sqlite3_column_bytes(stmt, 2);
+		char *converted_password = psylbm_strndup(password_uc, password_uc_size);
+
+		const unsigned char *salt_uc = sqlite3_column_text(stmt, 3);
+		const int salt_uc_size = sqlite3_column_bytes(stmt, 3);
+		char *converted_salt = psylbm_strndup(salt_uc, salt_uc_size);
+
 		u->id = sqlite3_column_int(stmt, 0);
-		u->name = strdup((char *)sqlite3_column_text(stmt, 1));
-		u->password = strdup((char *)sqlite3_column_text(stmt, 2));
-		u->salt = strdup((char *)sqlite3_column_text(stmt, 3));
+		u->name = converted_bookmark_name;
+		u->password = converted_password;
+		u->salt = converted_salt;
 	} else {
 		psy_lbm_free_user(u);
 		u = NULL;
@@ -55,10 +67,22 @@ user_t *psy_lbm_find_user_by_name(sqlite3 *_db, char *_name)
 	/* We only want the first occurence, and duplicate usernames should not exist
 	 * due to the unique restriction */
 	if (rc == SQLITE_ROW) {
+		const unsigned char *bookmark_name_uc = sqlite3_column_text(stmt, 1);
+		const int bookmark_name_uc_size = sqlite3_column_bytes(stmt, 1);
+		char *converted_bookmark_name = psylbm_strndup(bookmark_name_uc, bookmark_name_uc_size);
+
+		const unsigned char *password_uc = sqlite3_column_text(stmt, 2);
+		const int password_uc_size = sqlite3_column_bytes(stmt, 2);
+		char *converted_password = psylbm_strndup(password_uc, password_uc_size);
+
+		const unsigned char *salt_uc = sqlite3_column_text(stmt, 3);
+		const int salt_uc_size = sqlite3_column_bytes(stmt, 3);
+		char *converted_salt = psylbm_strndup(salt_uc, salt_uc_size);
+
 		u->id = sqlite3_column_int(stmt, 0);
-		u->name = strdup((char *)sqlite3_column_text(stmt, 1));
-		u->password = strdup((char *)sqlite3_column_text(stmt, 2));
-		u->salt = strdup((char *)sqlite3_column_text(stmt, 3));
+		u->name = converted_bookmark_name;
+		u->password = converted_password;
+		u->salt = converted_salt;
 	} else {
 		psy_lbm_free_user(u);
 		u = NULL;

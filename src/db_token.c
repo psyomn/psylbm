@@ -3,7 +3,7 @@
 #include <domain.h>
 
 /** This should only be called once, from user creation */
-int psy_lbm_make_token(sqlite3 *_db, uint32_t _user_id, char *_token)
+int psy_lbm_make_token(sqlite3 *_db, uint32_t _user_id, const char *_token)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
@@ -41,7 +41,7 @@ int psy_lbm_set_token(sqlite3 *_db, uint32_t _user_id, char *_token)
 	return 0;
 }
 
-char *_psy_lbm_generate_token()
+char *_psy_lbm_generate_token(void)
 {
 	int buffsize = 128;
 	char rand_data[buffsize];
@@ -65,17 +65,16 @@ char *_psy_lbm_generate_token()
 	return ret_string;
 }
 
-int32_t psy_lbm_find_user_id_by_token(sqlite3 *_db, char *_token)
+uint32_t psy_lbm_find_user_id_by_token(sqlite3 *_db, char *_token, uint8_t *error)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 	int ret;
 
-	sqlite3_prepare_v2(_db,
-			   SQL_FIND_USER_BY_TOKEN,
-			   sizeof(SQL_FIND_USER_BY_TOKEN),
-			   &stmt,
-			   t);
+	sqlite3_prepare_v2(
+		_db, SQL_FIND_USER_BY_TOKEN, sizeof(SQL_FIND_USER_BY_TOKEN),
+		&stmt, t);
+
 	sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_STATIC);
 
 	ret = sqlite3_step(stmt);
@@ -88,5 +87,7 @@ int32_t psy_lbm_find_user_id_by_token(sqlite3 *_db, char *_token)
 
 	sqlite3_finalize(stmt);
 	perror("Problem finding user by id");
-	return -1;
+	*error = 1;
+
+	return 0;
 }

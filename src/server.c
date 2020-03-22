@@ -6,20 +6,21 @@
 #include <unistd.h>
 #include <sqlite3.h>
 
-static psy_lbm_status_strings_t psy_lbm_statuses[] = {
-	{ PSYLBM_STARTED,   "started"	   },
-	{ PSYLBM_LISTENING, "listening"	   },
-	{ PSYLBM_PAUSED,    "paused"	   },
+static const psy_lbm_status_strings_t psy_lbm_statuses[] = {
+	{ PSYLBM_STARTED,   "started"      },
+	{ PSYLBM_LISTENING, "listening"    },
+	{ PSYLBM_PAUSED,    "paused"       },
 	{ PSYLBM_SHUTDOWN,  "shuttingdown" },
-	{ PSYLBM_PANIC,	    "panic"	   }
+	{ PSYLBM_PANIC,     "panic"        }
 };
 
-psy_lbm_server_t *psy_lbm_make_server(uint16_t _portnum, char *_host)
+psy_lbm_server_t *psy_lbm_make_server(uint16_t _portnum, const char *_host)
 {
-	psy_lbm_server_t *server = malloc(sizeof(psy_lbm_server_t));
+	psy_lbm_server_t *server = calloc(1, sizeof(psy_lbm_server_t));
+
+	strncpy(server->hostname, _host, sizeof(server->hostname) - 1);
 
 	server->portnum = _portnum;
-	server->hostname = _host;
 	server->status = PSYLBM_STARTED;
 	return server;
 }
@@ -102,7 +103,7 @@ void psy_lbm_print_server_info(psy_lbm_server_t *_server)
 	       "status", psy_lbm_server_status(_server));
 }
 
-char *psy_lbm_server_status(psy_lbm_server_t *_server)
+const char *psy_lbm_server_status(psy_lbm_server_t *_server)
 {
 	size_t size = sizeof(psy_lbm_statuses) / sizeof(psy_lbm_status_strings_t);
 	size_t index;

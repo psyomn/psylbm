@@ -1,7 +1,5 @@
-#ifndef SQL_STRINGS_H
-#define SQL_STRINGS_H
+#pragma once
 
-/* Table creation sql */
 #define SQL_CREATE_USERS                         \
 	"CREATE TABLE users("                          \
 	"id       INTEGER PRIMARY KEY AUTOINCREMENT, " \
@@ -24,7 +22,6 @@
 	"user_id INTEGER,"          \
 	"token TEXT);"
 
-/* Inserts */
 #define SQL_INSERT_USER                           \
 	"INSERT INTO users (username, password, salt) " \
 	"VALUES (?,?,?);"
@@ -49,7 +46,6 @@
 	"page    = ? "                   \
 	"WHERE id = ?;"
 
-/* Find */
 #define SQL_FIND_USER_BY_ID \
 	"SELECT * FROM users WHERE id = ?;"
 
@@ -74,8 +70,5 @@
 #define SQL_PURGE_BOOKMARKS \
 	"DELETE FROM bookmarks WHERE user_id = ?;"
 
-/* Count */
 #define SQL_COUNT_USER_BOOKMARKS \
 	"SELECT COUNT(*) FROM bookmarks WHERE user_id = ?;"
-
-#endif // ifndef SQL_STRINGS_H

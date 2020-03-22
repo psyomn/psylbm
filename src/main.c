@@ -2,40 +2,27 @@
 #include "server.h"
 #include "db_handler.h"
 
-void *start(void *data);
-void init();
-
-int  main(int argc, char *argv[])
+void init(void)
 {
-	static pthread_t __main_thread;
-	static void *__main_thread_status;
-
-	/* Init psylbm */
-	init();
-
-	/* Start the neverending listen of server */
-	pthread_create(&__main_thread, NULL, start, NULL);
-	pthread_join(__main_thread, __main_thread_status);
-	return 0;
+	srand(time(NULL));
+	psy_lbm_check_db();
 }
 
-void *start(void *data)
+int main(int argc, char *argv[])
 {
+	(void)argc;
+	(void)argv;
+
+	init();
+
 	psy_lbm_server_t *server = NULL;
 
-	server = psy_lbm_make_server(8080, "localhost");
+	server = psy_lbm_make_server(8080, "127.0.0.1");
 
 	psy_lbm_print_server_info(server);
 	psy_lbm_server_listen(server);
 
 	psy_lbm_free_server(server);
 
-	pthread_exit(NULL);
-}
-
-/* Any needed init goes here */
-void init()
-{
-	srand(time(NULL));
-	psy_lbm_check_db();
+	return 0;
 }

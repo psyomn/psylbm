@@ -1,5 +1,4 @@
-#ifndef PROTOCOL_RESPONSES_H
-#define PROTOCOL_RESPONSES_H
+#pragma once
 
 #define PSYLBM_USERNAME_TAKEN  "username-taken"
 #define PSYLBM_USERNAME_BAD    "bad-username"
@@ -27,5 +26,3 @@
 
 #define PSYLBM_SERVER_ERROR    "server-error"
 #define PSYLBM_BAD_REQUEST     "bad-request"
-
-#endif // ifndef PROTOCOL_RESPONSES_H

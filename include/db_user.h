@@ -1,5 +1,4 @@
-#ifndef DB_USER_H
-#define DB_USER_H
+#pragma once
 
 #include <common.h>
 #include <domain.h>
@@ -14,5 +13,3 @@ int   psy_lbm_insert_user(sqlite3 *, char *, char *);
 int _psy_lbm_user_exists(sqlite3 *, char *);
 
 char *_psy_lbm_hash_password(char *, int);
-
-#endif // ifndef DB_USER_H
