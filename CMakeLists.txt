@@ -57,6 +57,7 @@ set(psylbm_SOURCES
   src/db_token.c
   src/db_user.c
   src/domain.c
+  src/common.c
   src/protocol.c)
 
 set(PSYLBM_EXECUTABLE_NAME "psylbm-server")
@@ -93,3 +94,4 @@ function(psylbm_add_test name)
 endfunction(psylbm_add_test)
 
 psylbm_add_test(protocol_test)
+psylbm_add_test(common_test)
