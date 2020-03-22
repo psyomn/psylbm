@@ -7,11 +7,11 @@
 #include <sqlite3.h>
 
 static const psy_lbm_status_strings_t psy_lbm_statuses[] = {
-	{ PSYLBM_STARTED,   "started"	   },
-	{ PSYLBM_LISTENING, "listening"	   },
-	{ PSYLBM_PAUSED,    "paused"	   },
+	{ PSYLBM_STARTED,   "started"      },
+	{ PSYLBM_LISTENING, "listening"    },
+	{ PSYLBM_PAUSED,    "paused"       },
 	{ PSYLBM_SHUTDOWN,  "shuttingdown" },
-	{ PSYLBM_PANIC,	    "panic"	   }
+	{ PSYLBM_PANIC,     "panic"        }
 };
 
 psy_lbm_server_t *psy_lbm_make_server(uint16_t _portnum, const char *_host)

@@ -249,10 +249,10 @@ int psy_lbm_handle_register(psy_lbm_server_t *_s, remote_host_t *_h, char *_user
 	return 0;
 }
 
-int psy_lbm_handle_token(psy_lbm_server_t *	_s,
-			 remote_host_t *	_h,
-			 uint32_t		_user_id,
-			 char *			_token)
+int psy_lbm_handle_token(psy_lbm_server_t *_s,
+			 remote_host_t    *_h,
+			 uint32_t         _user_id,
+			 char             *_token)
 {
 	int ret = psy_lbm_set_token(_s->db, _user_id, _token);
 

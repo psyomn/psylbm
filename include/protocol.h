@@ -9,30 +9,30 @@ enum message_type { START_MESSAGE_TYPE = 0, MESS_AUTH = 0,
 		    MESS_BADREQUEST, END_MESSAGE_TYPE };
 
 struct insert_message {
-	char		name[255];
-	char		title[255];
-	char		volume_str[255];
-	char		chapter_str[255];
-	char		page_str[255];
-	char		token[255];
-	char		book_id_str[255];
+	char     name[255];
+	char     title[255];
+	char     volume_str[255];
+	char     chapter_str[255];
+	char     page_str[255];
+	char     token[255];
+	char     book_id_str[255];
 
-	uint32_t	volume;
-	uint32_t	chapter;
-	uint32_t	page;
-	uint32_t	book_id;
+	uint32_t volume;
+	uint32_t chapter;
+	uint32_t page;
+	uint32_t book_id;
 
-	uint8_t		type;
+	uint8_t  type;
 };
 
 struct register_message {
-	char	username[255];
-	char	password[255];
+	char username[255];
+	char password[255];
 };
 
 struct delete_message {
-	uint64_t	bookmark_id;
-	char		token[255];
+	uint64_t bookmark_id;
+	char     token[255];
 };
 
 struct purge_message {
@@ -50,11 +50,11 @@ struct syncdata_message {
 struct received_message {
 	uint8_t type;
 	union {
-		struct insert_message	insert;
+		struct insert_message   insert;
 		struct register_message regist;
 		struct delete_message delete;
-		struct purge_message	purge;
-		struct sync_message	sync;
+		struct purge_message    purge;
+		struct sync_message     sync;
 		struct syncdata_message syncdata;
 	} message;
 };

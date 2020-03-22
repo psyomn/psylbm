@@ -10,18 +10,18 @@
 #define PSYLBM_PANIC    -1
 
 struct psy_lbm_status_strings {
-	int		id;
-	const char *	status;
+	int        id;
+	const char *status;
 };
 
 typedef struct psy_lbm_status_strings psy_lbm_status_strings_t;
 
 struct psy_lbm_server {
-	uint16_t	portnum;
-	char		hostname[255];
-	int		status;
-	sqlite3 *	db;
-	int		sock;
+	uint16_t portnum;
+	char     hostname[255];
+	int      status;
+	sqlite3  *db;
+	int      sock;
 };
 
 typedef struct psy_lbm_server psy_lbm_server_t;

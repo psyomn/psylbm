@@ -6,7 +6,7 @@ char *psylbm_strndup(const unsigned char *src, size_t len)
 	// strings.
 	const size_t c_str_len = len + 1;
 
-	char *ret = calloc(0, sizeof(char) * c_str_len);
+	char *ret = calloc(1, sizeof(char) * c_str_len);
 
 	// TODO: this is bad because UTF. FIXME
 	memcpy(ret, src, len);

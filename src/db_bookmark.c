@@ -1,13 +1,13 @@
 #include <db_bookmark.h>
 #include <sql_strings.h>
 
-int psy_lbm_insert_bookmark(sqlite3 *	_db,
-			    uint32_t	_user_id,
-			    char *	_name,
-			    char *	_title,
-			    uint32_t	_volume,
-			    uint32_t	_chapter,
-			    uint32_t	_page)
+int psy_lbm_insert_bookmark(sqlite3  *_db,
+			    uint32_t _user_id,
+			    char     *_name,
+			    char     *_title,
+			    uint32_t _volume,
+			    uint32_t _chapter,
+			    uint32_t _page)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
