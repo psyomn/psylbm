@@ -21,4 +21,4 @@
 // unsigned char* strings from the database, because UTF-8. I should
 // revisit the structures handling strings, and fix them. That will
 // have to be yet another maintenance pass.
-char* psylbm_strndup(const unsigned char* src, size_t len);
+char *psylbm_strndup(const unsigned char *src, size_t len);

@@ -33,7 +33,10 @@ struct remote_host {
 };
 typedef struct remote_host remote_host_t;
 
-void      psy_lbm_free_user(user_t *);
-user_t *psy_lbm_make_user();
-bookmark_t *psy_lbm_make_bookmark();
-void      psy_lbm_free_bookmark(bookmark_t *);
+user_t *psy_lbm_make_user(void);
+
+void psy_lbm_free_user(user_t *);
+
+bookmark_t *psy_lbm_make_bookmark(void);
+
+void psy_lbm_free_bookmark(bookmark_t *);

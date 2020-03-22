@@ -2,11 +2,17 @@
 #include "server.h"
 #include "db_handler.h"
 
-void *start(void *data);
-void init();
+void init(void)
+{
+	srand(time(NULL));
+	psy_lbm_check_db();
+}
 
 int main(int argc, char *argv[])
 {
+	(void)argc;
+	(void)argv;
+
 	init();
 
 	psy_lbm_server_t *server = NULL;
@@ -19,10 +25,4 @@ int main(int argc, char *argv[])
 	psy_lbm_free_server(server);
 
 	return 0;
-}
-
-void init()
-{
-	srand(time(NULL));
-	psy_lbm_check_db();
 }

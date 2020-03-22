@@ -4,7 +4,7 @@
 #include <psylbm.h>
 
 /* Check if db exists - create if not */
-void psy_lbm_check_db()
+void psy_lbm_check_db(void)
 {
 	FILE *fd;
 
@@ -19,17 +19,17 @@ void psy_lbm_check_db()
 	fclose(fd);
 }
 
-void psy_lbm_make_db()
+void psy_lbm_make_db(void)
 {
-	sqlite3 *db;
-	int rc;
+	sqlite3 *db = NULL;
+	int rc = 0;
 	char *error = 0;
-	char *sql_strs[] = {
+	const char *sql_strs[] = {
 		SQL_CREATE_USERS,
 		SQL_CREATE_BOOKMARKS,
 		SQL_CREATE_API_TOKENS
 	};
-	int sql_ix;
+	int sql_ix = 0;
 	int sql_max = sizeof(sql_strs) / sizeof(char *);
 
 	printf("Making database for the first time ... \n");

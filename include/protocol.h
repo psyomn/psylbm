@@ -26,33 +26,36 @@ struct insert_message {
 };
 
 struct register_message {
+	char	username[255];
+	char	password[255];
 };
 
 struct delete_message {
+	uint64_t	bookmark_id;
+	char		token[255];
 };
 
 struct purge_message {
+	char token[255];
 };
 
 struct sync_message {
+	char token[255];
 };
 
 struct syncdata_message {
-};
-
-struct badrequest_message {
+	char token[255];
 };
 
 struct received_message {
 	uint8_t type;
 	union {
-		struct insert_message		insert;
-		struct register_message		regist;
+		struct insert_message	insert;
+		struct register_message regist;
 		struct delete_message delete;
-		struct purge_message		purge;
-		struct sync_message		sync;
-		struct syncdata_message		syncdata;
-		struct badrequest_message	badrequest;
+		struct purge_message	purge;
+		struct sync_message	sync;
+		struct syncdata_message syncdata;
 	} message;
 };
 

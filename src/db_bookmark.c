@@ -78,11 +78,20 @@ bookmark_t *psy_lbm_find_bookmark_by_name(sqlite3 *_db, char *_name)
 	if (sqlite3_step(stmt) != SQLITE_ROW)
 		return NULL;
 
+	// TODO: Fix utf strings
+	const unsigned char *bookmark_name_uc = sqlite3_column_text(stmt, 2);
+	const int bookmark_name_uc_size = sqlite3_column_bytes(stmt, 2);
+	char *converted_bookmark_name = psylbm_strndup(bookmark_name_uc, bookmark_name_uc_size);
+
+	const unsigned char *title_uc = sqlite3_column_text(stmt, 3);
+	const int title_uc_size = sqlite3_column_bytes(stmt, 3);
+	char *converted_title = psylbm_strndup(title_uc, title_uc_size);
+
 	book = psy_lbm_make_bookmark();
 	book->id = sqlite3_column_int(stmt, 0);
 	book->user_id = sqlite3_column_int(stmt, 1);
-	book->name = strdup((char *)sqlite3_column_text(stmt, 2));
-	book->title = strdup((char *)sqlite3_column_text(stmt, 3));
+	book->name = converted_bookmark_name;
+	book->title = converted_title;
 	book->volume = sqlite3_column_int(stmt, 4);
 	book->chapter = sqlite3_column_int(stmt, 5);
 	book->page = sqlite3_column_int(stmt, 6);
@@ -145,11 +154,20 @@ bookmark_t *psy_lbm_find_bookmark(sqlite3 *_db, uint32_t _bm_id)
 		return NULL;
 	}
 
+	// TODO: Fix utf strings
+	const unsigned char *bookmark_name_uc = sqlite3_column_text(stmt, 2);
+	const int bookmark_name_uc_size = sqlite3_column_bytes(stmt, 2);
+	char *converted_bookmark_name = psylbm_strndup(bookmark_name_uc, bookmark_name_uc_size);
+
+	const unsigned char *title_uc = sqlite3_column_text(stmt, 3);
+	const int title_uc_size = sqlite3_column_bytes(stmt, 3);
+	char *converted_title = psylbm_strndup(title_uc, title_uc_size);
+
 	book = psy_lbm_make_bookmark();
 	book->id = sqlite3_column_int(stmt, 0);
 	book->user_id = sqlite3_column_int(stmt, 1);
-	book->name = strdup((char *)sqlite3_column_text(stmt, 2));
-	book->title = strdup((char *)sqlite3_column_text(stmt, 3));
+	book->name = converted_bookmark_name;
+	book->title = converted_title;
 	book->volume = sqlite3_column_int(stmt, 4);
 	book->chapter = sqlite3_column_int(stmt, 5);
 	book->page = sqlite3_column_int(stmt, 6);
