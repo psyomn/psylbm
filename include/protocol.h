@@ -8,6 +8,11 @@ enum message_type { START_MESSAGE_TYPE = 0, MESS_AUTH = 0,
 		    MESS_PURGE, MESS_SYNC, MESS_SYNCDATA,
 		    MESS_BADREQUEST, END_MESSAGE_TYPE };
 
+struct auth_message {
+	char username[51];
+	char password[255];
+};
+
 struct insert_message {
 	char     name[255];
 	char     title[255];
@@ -31,8 +36,9 @@ struct register_message {
 };
 
 struct delete_message {
-	uint64_t bookmark_id;
 	char     token[255];
+	char     bookmark_id_str[255];
+	uint64_t bookmark_id;
 };
 
 struct purge_message {
@@ -56,6 +62,7 @@ struct received_message {
 		struct purge_message    purge;
 		struct sync_message     sync;
 		struct syncdata_message syncdata;
+		struct auth_message     auth;
 	} message;
 };
 
