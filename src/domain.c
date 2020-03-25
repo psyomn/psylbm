@@ -8,7 +8,7 @@ user_t *psy_lbm_make_user(void)
 	return user;
 }
 
-void psy_lbm_free_user(user_t *user)
+void psy_lbm_uree_user(struct user *user)
 {
 	if (user == NULL) return;
 	if (user->name != NULL) free(user->name);
@@ -18,7 +18,7 @@ void psy_lbm_free_user(user_t *user)
 	free(user);
 }
 
-void psy_lbm_free_bookmark(bookmark_t *bookmark)
+void psy_lbm_free_bookmark(struct bookmark *bookmark)
 {
 	if (bookmark == NULL) return;
 	if (bookmark->name != NULL) free(bookmark->name);
@@ -26,9 +26,7 @@ void psy_lbm_free_bookmark(bookmark_t *bookmark)
 	free(bookmark);
 }
 
-bookmark_t *psy_lbm_make_bookmark(void)
+struct bookmark *psy_lbm_make_bookmark(void)
 {
-	bookmark_t *b = calloc(0, sizeof(bookmark_t));
-
-	return b;
+	return calloc(0, sizeof(struct bookmark_t));
 }

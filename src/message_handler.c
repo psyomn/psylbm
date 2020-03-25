@@ -1,131 +1,98 @@
-#include <psylbm.h>
-#include <domain.h>
-#include <db_handler.h>
-#include <message_handler.h>
-#include <common.h>
-#include <protocol_responses.h>
-#include <sql_strings.h>
+#include "common.h"
 
-void _psy_lbm_reply(psy_lbm_server_t *_s, remote_host_t *_h, const char *_message)
+#include "psylbm.h"
+#include "domain.h"
+#include "db_handler.h"
+#include "message_handler.h"
+#include "protocol_responses.h"
+#include "sql_strings.h"
+#include "protocol.h"
+
+int psylbm_reply(struct psylbm_server *server, struct remote_host *host, const char *message)
 {
-	sendto(_s->sock,
-	       _message, strlen(_message),
-	       0, (struct sockaddr *)&_h->a, _h->l);
+	// TODO find better estimate here.
+	const size_t message_len = strnlen(message, 500);
+
+	return sendto(server->sock, message, message_len, 0,
+		      (struct sockaddr *)&host->a, host->l);
 }
 
-void psy_lbm_handle_message(psy_lbm_server_t *_s, remote_host_t *_h,
-			    char *_message)
+int psylbm_handle_message(struct psylbm_server *_s, struct remote_host *_h, char *message)
 {
 	char delimiters[] = "|";
 	char *token;
 	int badrequest = 0;
-	char *dupped_message = strdup(_message);
 
-	/* First token */
-	token = strtok(dupped_message, delimiters);
+	struct received_message recv_mess = { 0 };
 
-	if (token == NULL) {
-		badrequest = 1;
-		goto skip_parse;
+	psylbm_buffer_into_struct(message, &recv_mess);
+
+	switch (recv_mess.type) {
+	default: goto error;
+	case MESS_AUTH:
+		psylbm_handle_authorization(_s, _h, user, pass);
+		break;
+	case MESS_INSERT:
+		psylbm_handle_insert(_s, _h, name, title, i_vol, i_chap, i_page,
+				     auth_token, i_bkid);
+		break;
+	case MESS_REGISTER:
+		psylbm_handle_register(_s, _h, user, pass);
+		break;
+	case MESS_DELETE:
+		psylbm_handle_delete(_s, _h, i_bkid, token);
+		break;
+	case MESS_PURGE:
+		psylbm_handle_purge(_s, _h, auth_token);
+		break;
+	case MESS_SYNC:
+		psylbm_handle_sync(_s, _h, auth_token);
+		break;
+	case MESS_SYNCDATA:
+		psylbm_handle_syncdata(_s, _h, auth_token);
+		break;
 	}
 
-	if (!strcmp(token, "auth")) {
-		char *user = strtok(NULL, delimiters);
-		char *pass = strtok(NULL, delimiters);
-		psy_lbm_handle_authorization(_s, _h, user, pass);
-	} else if (!strcmp(token, "ins")) {
-		char *name = strtok(NULL, delimiters),
-		     *title = strtok(NULL, delimiters),
-		     *volume = strtok(NULL, delimiters),
-		     *chapter = strtok(NULL, delimiters),
-		     *page = strtok(NULL, delimiters),
-		     *auth_token = strtok(NULL, delimiters),
-		     *book_id = strtok(NULL, delimiters);
+	return 0;
 
-		uint32_t i_vol = atoi(volume),
-			 i_chap = atoi(chapter),
-			 i_page = atoi(page),
-			 i_bkid = 0;
-
-		if (book_id != NULL) i_bkid = atoi(book_id);
-
-		printf("Received bookmark request [%s]-[%s]\n", title, auth_token);
-		psy_lbm_handle_insert(_s, _h, name, title, i_vol, i_chap, i_page,
-				      auth_token, i_bkid);
-	} else if (!strcmp(token, "reg")) {
-		/* Register user */
-		char *user = strtok(NULL, delimiters);
-		char *pass = strtok(NULL, delimiters);
-		printf("Registration request [%s]\n", user);
-
-		if ((user != NULL) && (pass != NULL))
-			psy_lbm_handle_register(_s, _h, user, pass);
-		else
-			badrequest = 1;
-	} else if (!strcmp(token, "del")) {
-		/* Delete a bookmark */
-		char *bookmark_id = strtok(NULL, delimiters),
-		     *auth_token = strtok(NULL, delimiters);
-		uint32_t i_bkid = atoi(bookmark_id);
-		printf("Delete request [%d]-[%s]\n", i_bkid, auth_token);
-
-		psy_lbm_handle_delete(_s, _h, i_bkid, token);
-	} else if (!strcmp(token, "purge")) {
-		char *auth_token = strtok(NULL, delimiters);
-		printf("Processing purge request... [%s]\n", auth_token);
-		psy_lbm_handle_purge(_s, _h, auth_token);
-	} else if (!strcmp(token, "sync")) {
-		char *auth_token = strtok(NULL, delimiters);
-		printf("Sync request from [%s]\n", auth_token);
-		psy_lbm_handle_sync(_s, _h, auth_token);
-	} else if (!strcmp(token, "syncdata")) {
-		char *auth_token = strtok(NULL, delimiters);
-		printf("Syncdata request from [%s]\n", auth_token);
-		psy_lbm_handle_syncdata(_s, _h, auth_token);
-	} else {
-		badrequest = 1;
-	}
-
-skip_parse:
-	if (badrequest) {
-		/* TODO: a logger would be nice here */
-		printf("Received malformed request [%s]\n", _message);
-		_psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
-	}
-
-	free(dupped_message);
+error:
+	fprintf(stdout, "Received malformed request [%s]\n", message);
+	psylbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
+	return -1;
 }
 
 /* provided a username and password generate a token, and send it back */
-void psy_lbm_handle_authorization(psy_lbm_server_t *_s, remote_host_t *_h,
-				  char *_username, char *_password)
+int psylbm_handle_authorization(struct psylbm_server *_s, struct remote_host *_h,
+				char *_username, char *_password)
 {
 	char *hash = NULL;
 	int salt;
-	user_t *u = psy_lbm_find_user_by_name(_s->db, _username);
+	user_t *u = psylbm_find_user_by_name(_s->db, _username);
 
 	if (u == NULL) {
 		/* No user found - send back fail message */
-		_psy_lbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
-		return;
+		_psylbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
+		return 1;
 	}
 
 	salt = atoi(u->salt);
-	hash = _psy_lbm_hash_password(_password, salt);
+	hash = _psylbm_hash_password(_password, salt);
 
 	if (!strcmp(hash, u->password)) {
-		char *token = _psy_lbm_generate_token();
-		psy_lbm_handle_token(_s, _h, u->id, token);
+		char *token = _psylbm_generate_token();
+		psylbm_handle_token(_s, _h, u->id, token);
 		printf("Authenticate [%s]-[%s]\n", u->name, token);
 		free(token);
 	} else {
 		/* TODO Log me */
 		printf("Failed login attempt [%s]\n", u->name);
-		_psy_lbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
+		_psylbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
 	}
 
 	free(hash);
-	psy_lbm_free_user(u);
+	psylbm_free_user(u);
+
+	return 0;
 }
 
 /* Send the book info (title, vol, chapter, page), and if the token is a valid
@@ -133,37 +100,37 @@ void psy_lbm_handle_authorization(psy_lbm_server_t *_s, remote_host_t *_h,
  * previously been inserted. If that is the case, the info is updated. If not, a
  * new record is created.
  */
-int psy_lbm_handle_insert(psy_lbm_server_t *_s, remote_host_t *_h,
-			  char *_name, char *_title, uint32_t _vol,
-			  uint32_t _chapter, uint32_t _page, char *_token,
-			  uint32_t _bookmark_id)
+int psylbm_handle_insert(struct psylbm_server *server, struct remote_host *host,
+			 char *_name, char *_title, uint32_t _vol,
+			 uint32_t _chapter, uint32_t _page, char *token,
+			 uint32_t _bookmark_id)
 {
 	int ret = 0;
 	uint8_t error = 0;
-	uint32_t uid = psy_lbm_find_user_id_by_token(_s->db, _token, &error);
+	uint32_t uid = psylbm_find_user_id_by_token(server->db, token, &error);
 	bookmark_t *bm = NULL;
 
 	/* No such user */
 	if (error) {
-		_psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
+		psylbm_reply(server, host, PSYLBM_BAD_REQUEST);
 		return -1;
 	}
 
 	if (_bookmark_id == 0)
 		/* No id given - Does the previous bookmark exist? */
-		bm = psy_lbm_find_bookmark_by_name(_s->db, _name);
+		bm = psylbm_find_bookmark_by_name(server->db, _name);
 	else
-		bm = psy_lbm_find_bookmark(_s->db, _bookmark_id);
+		bm = psylbm_find_bookmark(server->db, _bookmark_id);
 
 	if (bm == NULL) {
 		/* No such bookmark - inset */
-		ret = psy_lbm_insert_bookmark(
-			_s->db, uid, _name, _title, _vol, _chapter, _page);
-		bm = psy_lbm_find_bookmark_by_name(_s->db, _name);
+		ret = psylbm_insert_bookmark(
+			server->db, uid, _name, _title, _vol, _chapter, _page);
+		bm = psylbm_find_bookmark_by_name(server->db, _name);
 	} else {
 		/* Found bookmark - update */
-		ret = psy_lbm_update_bookmark(
-			_s->db, _name, _title, _vol, _chapter, _page, _bookmark_id);
+		ret = psylbm_update_bookmark(
+			server->db, _name, _title, _vol, _chapter, _page, _bookmark_id);
 	}
 
 	if (!ret) {
@@ -172,36 +139,37 @@ int psy_lbm_handle_insert(psy_lbm_server_t *_s, remote_host_t *_h,
 		sprintf(idstr, "%d", bm->id);
 		strcpy(reply, PSYLBM_INS_OK);
 		strcat(reply, idstr);
-		_psy_lbm_reply(_s, _h, reply);
+		psylbm_reply(server, host, reply);
 	} else {
-		_psy_lbm_reply(_s, _h, PSYLBM_INS_FAIL);
+		psylbm_reply(server, host, PSYLBM_INS_FAIL);
 	}
 
-	psy_lbm_free_bookmark(bm);
+	psylbm_free_bookmark(bm);
 
 	return 0;
 }
 
-int psy_lbm_handle_delete(psy_lbm_server_t *_s, remote_host_t *_h, uint32_t _bkid,
-			  char *_token)
+int psylbm_handle_delete(struct psylbm_server *server, struct remote_host *host,
+			 struct received_message *recv_mess)
 {
-	bookmark_t *bm = NULL;
+	struct bookmark *bm = NULL;
+	const uint32_t book_id = recv_mess->message.delete.bookmark_id;
+	const char *token = &recv_mess->message.delete.token[0];
 	uint32_t user_id = 0;
 	uint8_t error = 0;
 	int ret = 0;
 
-	user_id = psy_lbm_find_user_id_by_token(_s->db, _token, &error);
-
-	bm = psy_lbm_find_bookmark(_s->db, _bkid);
+	user_id = psylbm_find_user_id_by_token(server->db, token, &error);
+	bm = psylbm_find_bookmark(server->db, book_id);
 
 	if (bm && (bm->user_id == user_id)) {
 		/* Authorization ok */
 		printf("Deleting...\n");
 
-		if (psy_lbm_delete_bookmark(_s->db, _bkid) == 0)
-			_psy_lbm_reply(_s, _h, PSYLBM_DEL_OK);
+		if (psylbm_delete_bookmark(server->db, book_id) == 0)
+			psylbm_reply(server, host, PSYLBM_DEL_OK);
 		else
-			_psy_lbm_reply(_s, _h, PSYLBM_DEL_FAIL);
+			psylbm_reply(server, host, PSYLBM_DEL_FAIL);
 	} else if (!bm) {
 		/* TODO log me */
 		ret = -1;
@@ -212,9 +180,9 @@ int psy_lbm_handle_delete(psy_lbm_server_t *_s, remote_host_t *_h, uint32_t _bki
 	}
 
 	if (ret != 0)
-		_psy_lbm_reply(_s, _h, PSYLBM_DEL_FAIL);
+		psylbm_reply(server, host, PSYLBM_DEL_FAIL);
 
-	psy_lbm_free_bookmark(bm);
+	psylbm_free_bookmark(bm);
 
 	return ret;
 }
@@ -222,87 +190,73 @@ int psy_lbm_handle_delete(psy_lbm_server_t *_s, remote_host_t *_h, uint32_t _bki
 /*
  * Register an account. Return a status int.
  */
-int psy_lbm_handle_register(psy_lbm_server_t *_s, remote_host_t *_h, char *_user,
-			    char *_pass)
+int psylbm_handle_register(struct psylbm_server *server, struct remote_host *host,
+			   struct received_message *recv_mess)
 {
-	int ret;
-	int usr_l = strlen(_user), pass_l = strlen(_pass);
-	int lengths_ok =
-		usr_l > 0 && usr_l <= PSYLBM_USERNAME_LENGTH &&
-		pass_l > 0 && pass_l <= PSYLBM_PASSWORD_LENGTH;
-
-	if (!lengths_ok) {
-		_psy_lbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
-		return -1;
-	}
-
-	ret = psy_lbm_insert_user(_s->db, _user, _pass);
+	const char *user = &recv_mess->message.regist.username[0];
+	const char *pass = &recv_mess->message.regist.password[0];
+	const int ret = psylbm_insert_user(server->db, user, pass);
 
 	if (ret == -1) {
-		_psy_lbm_reply(_s, _h, PSYLBM_SERVER_ERROR);
+		psylbm_reply(server, host, PSYLBM_SERVER_ERROR);
 	} else if (ret == -2) {
-		_psy_lbm_reply(_s, _h, PSYLBM_USERNAME_TAKEN);
-		printf("--| Username [%s] has been taken.\n", _user); /* TODO: logme */
+		_psylbm_reply(server, host, PSYLBM_USERNAME_TAKEN);
+		printf("--| Username [%s] has been taken.\n", user); /* TODO: logme */
 	} else {
 	}
-
-	return 0;
-}
-
-int psy_lbm_handle_token(psy_lbm_server_t *_s,
-			 remote_host_t    *_h,
-			 uint32_t         _user_id,
-			 char             *_token)
-{
-	int ret = psy_lbm_set_token(_s->db, _user_id, _token);
-
-	if (!ret) {
-		psy_lbm_set_token(_s->db, _user_id, _token);
-
-		/* Build response text */
-		char resp[100];
-		memset(resp, 0, sizeof(resp));
-		strcpy(resp, PSYLBM_AUTH);
-		strcat(resp, _token);
-		_psy_lbm_reply(_s, _h, resp);
-	} else {
-		_psy_lbm_reply(_s, _h, PSYLBM_SERVER_ERROR);
-	}
-	return 0;
-}
-
-/* TODO In case we ever want to log, this should handle the error */
-int psy_lbm_handle_error(const char *_sent_stuff)
-{
-	printf("error: %s\n", _sent_stuff);
-	return 0;
-}
-
-int psy_lbm_handle_purge(psy_lbm_server_t *_s, remote_host_t *_h, char *_token)
-{
-	int ret = 0;
-	uint8_t error = 0;
-	uint32_t user_id = psy_lbm_find_user_id_by_token(_s->db, _token, &error);
-
-	if (error) {
-		_psy_lbm_reply(_s, _h, PSYLBM_PURGE_FAIL);
-		return -1;
-	}
-
-	psy_lbm_purge_bookmarks(_s->db, user_id);
-	_psy_lbm_reply(_s, _h, PSYLBM_PURGE_OK);
 
 	return ret;
 }
 
-int psy_lbm_handle_sync(psy_lbm_server_t *_s, remote_host_t *_h, char *_token)
+int psylbm_handle_token(struct psylbm_server *server, struct remote_host *host,
+			uint32_t user_id, char *token)
 {
+	int ret = psylbm_set_token(server->db, user_id, token);
+
+	if (!ret) {
+		psylbm_set_token(server->db, user_id, token);
+
+		char resp[100];
+		memset(resp, 0, sizeof(resp));
+		strcpy(resp, PSYLBM_AUTH);
+		strcat(resp, token);
+		psylbm_reply(server, host, resp);
+	} else {
+		psylbm_reply(server, host, PSYLBM_SERVER_ERROR);
+	}
+
+	return 0;
+}
+
+int psylbm_handle_purge(struct psylbm_server *server, struct remote_host *host,
+			struct received_message *recv_mess)
+{
+	char *token = &recv_mess->message.purge.token[0];
+	int ret = 0;
 	uint8_t error = 0;
-	uint32_t user_id = psy_lbm_find_user_id_by_token(_s->db, _token, &error);
+	uint32_t user_id = psylbm_find_user_id_by_token(server->db, token, &error);
+
+	if (error) {
+		psylbm_reply(server, host, PSYLBM_PURGE_FAIL);
+		return -1;
+	}
+
+	psylbm_purge_bookmarks(server->db, user_id);
+	psylbm_reply(server, host, PSYLBM_PURGE_OK);
+
+	return ret;
+}
+
+int psylbm_handle_sync(struct psylbm_server *server, struct remote_host *host,
+		       struct received_message *recv_mess)
+{
+	char *token = &recv_mess->message.sync.token[0];
+	uint8_t error = 0;
+	uint32_t user_id = psylbm_find_user_id_by_token(server->db, token, &error);
 
 	if (error) {
 		printf("Problem syncing - no such user...\n");
-		_psy_lbm_reply(_s, _h, PSYLBM_SYNC_FAIL);
+		psylbm_reply(server, host, PSYLBM_SYNC_FAIL);
 		return -1;
 	}
 
@@ -311,12 +265,12 @@ int psy_lbm_handle_sync(psy_lbm_server_t *_s, remote_host_t *_h, char *_token)
 	char reply[128] = { 0 };
 	char countstr[64] = { 0 };
 
-	count = psy_lbm_count_user_bookmarks(_s->db, user_id);
+	count = psylbm_count_user_bookmarks(server->db, user_id);
 
 	sprintf(countstr, "%d", count);
 	strcpy(reply, PSYLBM_SYNC);
 	strcat(reply, countstr);
-	_psy_lbm_reply(_s, _h, reply);
+	psylbm_reply(server, host, reply);
 
 	return ret;
 }
@@ -326,27 +280,28 @@ int psy_lbm_handle_sync(psy_lbm_server_t *_s, remote_host_t *_h, char *_token)
  * sake of simplicity, and not relying on quite a bit of memory, we'll bundle
  * the row-iteration on this function
  */
-int psy_lbm_handle_syncdata(psy_lbm_server_t *_s, remote_host_t *_h,
-			    char *_token)
+int psylbm_handle_syncdata(struct psylbm_server *server, struct remote_host *host,
+			   struct received_message *recv_mess)
 {
+	char *token = &recv_mess->message.syncdata.token[0];
 	int ret = 0;
 	uint8_t error = 0;
-	uint32_t user_id = psy_lbm_find_user_id_by_token(_s->db, _token, &error);
+	uint32_t user_id = psylbm_find_user_id_by_token(server->db, token, &error);
 
 	if (error) {
 		printf("Syncdata error: no such user [%d]\n", user_id);
-		_psy_lbm_reply(_s, _h, PSYLBM_SYNCDATA_FAIL);
+		psylbm_reply(server, host, PSYLBM_SYNCDATA_FAIL);
 		return -1;
 	}
 
-	bookmark_t *book = NULL;
+	struct bookmark *book = NULL;
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 	char reply[1024] = { 0 };
 
-	book = psy_lbm_make_bookmark();
+	book = psylbm_make_bookmark();
 
-	sqlite3_prepare_v2(_s->db, SQL_FIND_BOOKMARKS_BY_USER_ID,
+	sqlite3_prepare_v2(server->db, SQL_FIND_BOOKMARKS_BY_USER_ID,
 			   sizeof(SQL_FIND_BOOKMARKS_BY_USER_ID), &stmt, t);
 
 	sqlite3_bind_int(stmt, 1, user_id);
@@ -369,21 +324,28 @@ int psy_lbm_handle_syncdata(psy_lbm_server_t *_s, remote_host_t *_h,
 		book->chapter = sqlite3_column_int(stmt, 5);
 		book->page = sqlite3_column_int(stmt, 6);
 
-		printf("Sync bookmark with id [%d] for [%s]\n", book->id, _token);
+		printf("Sync bookmark with id [%d] for [%s]\n", book->id, token);
 
 		memset(reply, 0, sizeof(reply));
 		sprintf(reply, "%d|%s|%s|%d|%d|%d",
 			book->id, book->name, book->title, book->volume,
 			book->chapter, book->page);
-		_psy_lbm_reply(_s, _h, reply);
+		_psylbm_reply(server, host, reply);
 	}
 
 	/* Since we're not dupping in this case, above */
 	book->name = NULL;
 	book->title = NULL;
 
-	psy_lbm_free_bookmark(book);
+	psylbm_free_bookmark(book);
 	sqlite3_finalize(stmt);
 	printf("Done with syncdata...\n");
 	return ret;
+}
+
+/* TODO In case we ever want to log, this should handle the error */
+int psylbm_handle_error(const char *_sent_stuff)
+{
+	printf("error: %s\n", _sent_stuff);
+	return 0;
 }
