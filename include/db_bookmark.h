@@ -3,14 +3,7 @@
 #include <domain.h>
 #include <common.h>
 
-int psy_lbm_insert_bookmark(
-	sqlite3 *,
-	uint32_t,
-	char *,
-	char *,
-	uint32_t,
-	uint32_t,
-	uint32_t);
+int psylbm_insert_bookmark(sqlite3 *, struct receive_message *);
 
 int psy_lbm_update_bookmark(
 	sqlite3 *,
