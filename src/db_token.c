@@ -41,7 +41,7 @@ int psylbm_set_token(sqlite3 *_db, uint32_t _user_id, char *_token)
 	return 0;
 }
 
-char *_psylbm_generate_token(void)
+char *psylbm_generate_token(void)
 {
 	int buffsize = 128;
 	char rand_data[buffsize];

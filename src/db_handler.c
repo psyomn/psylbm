@@ -4,7 +4,7 @@
 #include <psylbm.h>
 
 /* Check if db exists - create if not */
-void psy_lbm_check_db(void)
+void psylbm_check_db(void)
 {
 	FILE *fd;
 
@@ -12,14 +12,14 @@ void psy_lbm_check_db(void)
 
 	if (!fd) {
 		/* db dne, so make db */
-		psy_lbm_make_db();
+		psylbm_make_db();
 		return;
 	}
 
 	fclose(fd);
 }
 
-void psy_lbm_make_db(void)
+void psylbm_make_db(void)
 {
 	sqlite3 *db = NULL;
 	int rc = 0;

@@ -1,14 +1,12 @@
 #include <domain.h>
 #include <common.h>
 
-user_t *psy_lbm_make_user(void)
+struct user *psylbm_make_user(void)
 {
-	user_t *user = calloc(0, sizeof(user_t));
-
-	return user;
+	return calloc(0, sizeof(struct user));
 }
 
-void psy_lbm_uree_user(struct user *user)
+void psylbm_free_user(struct user *user)
 {
 	if (user == NULL) return;
 	if (user->name != NULL) free(user->name);
@@ -18,15 +16,16 @@ void psy_lbm_uree_user(struct user *user)
 	free(user);
 }
 
-void psy_lbm_free_bookmark(struct bookmark *bookmark)
+struct bookmark *psylbm_make_bookmark(void)
+{
+	return calloc(0, sizeof(struct bookmark));
+}
+
+void psylbm_free_bookmark(struct bookmark *bookmark)
 {
 	if (bookmark == NULL) return;
 	if (bookmark->name != NULL) free(bookmark->name);
 	if (bookmark->title != NULL) free(bookmark->title);
-	free(bookmark);
-}
 
-struct bookmark *psy_lbm_make_bookmark(void)
-{
-	return calloc(0, sizeof(struct bookmark_t));
+	free(bookmark);
 }

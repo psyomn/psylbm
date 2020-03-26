@@ -3,7 +3,7 @@
 #include "db_bookmark.h"
 #include "sql_strings.h"
 
-int psylbm_insert_bookmark(sqlite3 *db, struct received_message recv_mess)
+int psylbm_insert_bookmark(sqlite3 *db, struct received_message *recv_mess)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
@@ -11,17 +11,25 @@ int psylbm_insert_bookmark(sqlite3 *db, struct received_message recv_mess)
 	sqlite3_prepare_v2(db, SQL_INSERT_BOOKMARK,
 			   sizeof(SQL_INSERT_BOOKMARK), &stmt, t);
 
-	sqlite3_bind_int(stmt, 1, recv_mess->user_id);
-	sqlite3_bind_text(stmt, 2, recv_mess->name, strlen(recv_mess->name), SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 3, recv_mess->title, strlen(recv_mess->title), SQLITE_STAtIC);
-	sqlite3_bind_int(stmt, 4, recv_mess->volume);
-	sqlite3_bind_int(stmt, 5, recv_mess->chapter);
-	sqlite3_bind_int(stmt, 6, recv_mess->page);
+	sqlite3_bind_int(stmt, 1, recv_mess->message.insert.user_id);
+
+	sqlite3_bind_text(stmt, 2, recv_mess->message.insert.name,
+			  strlen(recv_mess->message.insert.name),
+			  SQLITE_STATIC);
+
+	sqlite3_bind_text(stmt, 3, recv_mess->message.insert.title,
+			  strlen(recv_mess->message.insert.title),
+			  SQLITE_STATIC);
+
+	sqlite3_bind_int(stmt, 4, recv_mess->message.insert.volume);
+	sqlite3_bind_int(stmt, 5, recv_mess->message.insert.chapter);
+	sqlite3_bind_int(stmt, 6, recv_mess->message.insert.page);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
-		printf("Problem inserting bookmark [%d] [%s] [%s]\n",
-		       recv_mess->_user_id, recv_mess->_name,
-		       recv_mess->title);
+		printf("problem inserting bookmark [%d] [%s] [%s]\n",
+		       recv_mess->message.insert.user_id,
+		       recv_mess->message.insert.name,
+		       recv_mess->message.insert.title);
 		return -1;
 	}
 
@@ -29,30 +37,38 @@ int psylbm_insert_bookmark(sqlite3 *db, struct received_message recv_mess)
 	return 0;
 }
 
-int psylbm_update_bookmark(sqlite3 *_db, char *_name,
-			   char *_title, uint32_t _volume, uint32_t _chapter,
-			   uint32_t _page, uint32_t _bookmark_id)
+int psylbm_update_bookmark(sqlite3 *db, struct received_message *mess)
 {
 	int ret = 0;
-	bookmark_t *bm = NULL;
+	struct bookmark *bm = NULL;
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
-	if (_bookmark_id == 0) bm = psylbm_find_bookmark_by_name(_db, _name);
-	else bm = psylbm_find_bookmark(_db, _bookmark_id);
+	if (mess->message.insert.book_id == 0)
+		bm = psylbm_find_bookmark_by_name(db, &mess->message.insert.name[0]);
+	else
+		bm = psylbm_find_bookmark(db, mess->message.insert.book_id);
 
-	sqlite3_prepare_v2(_db, SQL_UPDATE_BOOKMARK_VALUES,
+	sqlite3_prepare_v2(db, SQL_UPDATE_BOOKMARK_VALUES,
 			   sizeof(SQL_UPDATE_BOOKMARK_VALUES), &stmt, t);
 
-	sqlite3_bind_text(stmt, 1, _name, strlen(_name), SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, _title, strlen(_title), SQLITE_STATIC);
-	sqlite3_bind_int(stmt, 3, _volume);
-	sqlite3_bind_int(stmt, 4, _chapter);
-	sqlite3_bind_int(stmt, 5, _page);
+	sqlite3_bind_text(stmt, 1,
+			  mess->message.insert.name,
+			  strlen(mess->message.insert.name),
+			  SQLITE_STATIC);
+
+	sqlite3_bind_text(stmt, 2,
+			  mess->message.insert.title,
+			  strlen(mess->message.insert.title),
+			  SQLITE_STATIC);
+
+	sqlite3_bind_int(stmt, 3, mess->message.insert.volume);
+	sqlite3_bind_int(stmt, 4, mess->message.insert.chapter);
+	sqlite3_bind_int(stmt, 5, mess->message.insert.page);
 	sqlite3_bind_int(stmt, 6, bm->id);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
-		printf("Error updating bookmark\n");
+		printf("error updating bookmark\n");
 		ret = -1;
 	}
 
@@ -63,7 +79,7 @@ int psylbm_update_bookmark(sqlite3 *_db, char *_name,
 
 struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *_db, char *_name)
 {
-	bookmark_t *book = NULL;
+	struct bookmark *book = NULL;
 	const char **t = NULL;
 	sqlite3_stmt *stmt = NULL;
 
@@ -137,7 +153,7 @@ int psylbm_purge_bookmarks(sqlite3 *_db, uint32_t _user_id)
 
 struct bookmark *psylbm_find_bookmark(sqlite3 *_db, uint32_t _bm_id)
 {
-	bookmark_t *book = NULL;
+	struct bookmark *book = NULL;
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
@@ -184,11 +200,14 @@ uint32_t psylbm_count_user_bookmarks(sqlite3 *db, uint32_t user_id)
 	sqlite3_prepare_v2(db, SQL_COUNT_USER_BOOKMARKS,
 			   sizeof(SQL_COUNT_USER_BOOKMARKS), &stmt, t);
 
-	sqlite3_bind_int(stmt, 1, _user_id);
+	sqlite3_bind_int(stmt, 1, user_id);
 	stat = sqlite3_step(stmt);
 
-	if (stat == SQLITE_ROW) count = sqlite3_column_int(stmt, 0);
-	else printf("Problem counting bookmarks\n");
+	if (stat == SQLITE_ROW)
+		count = sqlite3_column_int(stmt, 0);
+
+	else
+		printf("Problem counting bookmarks\n");
 
 	sqlite3_finalize(stmt);
 

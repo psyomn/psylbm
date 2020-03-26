@@ -14,7 +14,7 @@ static const struct psylbm_status_strings psylbm_statuses[] = {
 	{ PSYLBM_PANIC,     "panic"        }
 };
 
-struct psylbm_server *psy_lbm_make_server(uint16_t _portnum, const char *_host)
+struct psylbm_server *psylbm_make_server(uint16_t _portnum, const char *_host)
 {
 	struct psylbm_server *server = calloc(1, sizeof(struct psylbm_server));
 
@@ -25,13 +25,13 @@ struct psylbm_server *psy_lbm_make_server(uint16_t _portnum, const char *_host)
 	return server;
 }
 
-void psy_lbm_free_server(struct psylbm_server *_s)
+void psylbm_free_server(struct psylbm_server *_s)
 {
 	free(_s->hostname);
 	free(_s);
 }
 
-void psy_lbm_server_listen(struct psylbm_server *server)
+void psylbm_server_listen(struct psylbm_server *server)
 {
 	int fd = 0;
 

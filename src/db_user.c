@@ -5,10 +5,10 @@
 #include <db_user.h>
 #include <db_token.h>
 
-user_t *psylbm_find_user(sqlite3 *_db, uint32_t _id)
+struct user *psylbm_find_user(sqlite3 *_db, uint32_t _id)
 {
 	sqlite3_stmt *stmt = NULL;
-	user_t *u = NULL;
+	struct user *u = NULL;
 	const char **t = NULL;
 	int rc;
 
@@ -48,10 +48,10 @@ user_t *psylbm_find_user(sqlite3 *_db, uint32_t _id)
 }
 
 /* Look for a user. Null if not found */
-user_t *psylbm_find_user_by_name(sqlite3 *_db, char *_name)
+struct user *psylbm_find_user_by_name(sqlite3 *_db, const char *_name)
 {
 	sqlite3_stmt *stmt = NULL;
-	user_t *u = NULL;
+	struct user *u = NULL;
 	const char **t = NULL;
 	int rc;
 
@@ -97,7 +97,7 @@ int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
-	char *hashedpassword = NULL;
+	char *hashed_password = NULL;
 	struct user *u = NULL;
 	int salt = time(0);
 	char salt_str[11];
@@ -105,7 +105,7 @@ int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
 	if (psylbm_user_exists(db, username)) return -2;
 
 	sprintf(salt_str, "%d", salt);
-	hashedpassword = psylbm_hash_password(password, salt);
+	hashed_password = psylbm_hash_password(password, salt);
 
 	sqlite3_prepare_v2(db, SQL_INSERT_USER,
 			   sizeof(SQL_INSERT_USER), &stmt, t);
@@ -117,8 +117,8 @@ int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
 			  SQLITE_STATIC);
 	sqlite3_bind_text(stmt,
 			  2,
-			  hashedpassword,
-			  strlen(hashedpassword),
+			  hashed_password,
+			  strlen(hashed_password),
 			  SQLITE_STATIC);
 	sqlite3_bind_text(stmt,
 			  3,
@@ -128,12 +128,12 @@ int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
 		perror("Problem inserting user row");
-		free(hashedpassword);
+		free(hashed_password);
 		sqlite3_finalize(stmt);
 		return -1;
 	}
 
-	free(hashedpassword);
+	free(hashed_password);
 	sqlite3_finalize(stmt);
 
 	/*
@@ -149,14 +149,15 @@ int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
 	return 0;
 }
 
-int psylbm_user_exists(sqlite3 *_db, char *_name)
+int psylbm_user_exists(sqlite3 *db, const char *name)
 {
 	int ret;
-	user_t *u = NULL;
+	struct user *usr = NULL;
 
-	u = psylbm_find_user_by_name(_db, _name);
-	ret = (u == NULL ? 0 : 1);
-	psylbm_free_user(u);
+	usr = psylbm_find_user_by_name(db, name);
+	ret = !(usr == NULL);
+
+	psylbm_free_user(usr);
 
 	return ret;
 }
@@ -165,20 +166,21 @@ int psylbm_user_exists(sqlite3 *_db, char *_name)
  * Thanks to Adam Lamers
  *   http://stackoverflow.com/questions/2262386/
  */
-char *psylbm_hash_password(char *_pass, int _salt)
+char *psylbm_hash_password(const char *pass, int salt)
 {
 	unsigned char hashed_pass[SHA256_DIGEST_LENGTH];
 	char *ret_string = malloc(SHA256_DIGEST_LENGTH * 2 + 1);
 
+	char string[50 + 10 + 1] = { 0 };
+
 	/* 10 is since epoch bytes for salt */
-	char string[PSYLBM_PASSWORD_LENGTH + 10 + 1];
-	char since_epoch[11];
+	char since_epoch[11] = { 0 };
 	int i = 0;
 
 	/* Build salted string */
 	memset(string, 0, sizeof(string));
-	sprintf(since_epoch, "%d", _salt);
-	strcpy(string, _pass);
+	sprintf(since_epoch, "%d", salt);
+	strcpy(string, pass);
 	strcat(string, since_epoch);
 
 	/* And get the hashed value */

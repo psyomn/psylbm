@@ -17,12 +17,8 @@ int psylbm_reply(struct psylbm_server *server, struct remote_host *host, const c
 		      (struct sockaddr *)&host->a, host->l);
 }
 
-int psylbm_handle_message(struct psylbm_server *_s, struct remote_host *_h, char *message)
+int psylbm_handle_message(struct psylbm_server *server, struct remote_host *host, char *message)
 {
-	char delimiters[] = "|";
-	char *token;
-	int badrequest = 0;
-
 	struct received_message recv_mess = { 0 };
 
 	psylbm_buffer_into_struct(message, &recv_mess);
@@ -30,67 +26,67 @@ int psylbm_handle_message(struct psylbm_server *_s, struct remote_host *_h, char
 	switch (recv_mess.type) {
 	default: goto error;
 	case MESS_AUTH:
-		psylbm_handle_authorization(_s, _h, user, pass);
+		psylbm_handle_authorization(server, host, &recv_mess);
 		break;
 	case MESS_INSERT:
-		psylbm_handle_insert(_s, _h, name, title, i_vol, i_chap, i_page,
-				     auth_token, i_bkid);
+		psylbm_handle_insert(server, host, &recv_mess);
 		break;
 	case MESS_REGISTER:
-		psylbm_handle_register(_s, _h, user, pass);
+		psylbm_handle_register(server, host, &recv_mess);
 		break;
 	case MESS_DELETE:
-		psylbm_handle_delete(_s, _h, i_bkid, token);
+		psylbm_handle_delete(server, host, &recv_mess);
 		break;
 	case MESS_PURGE:
-		psylbm_handle_purge(_s, _h, auth_token);
+		psylbm_handle_purge(server, host, &recv_mess);
 		break;
 	case MESS_SYNC:
-		psylbm_handle_sync(_s, _h, auth_token);
+		psylbm_handle_sync(server, host, &recv_mess);
 		break;
 	case MESS_SYNCDATA:
-		psylbm_handle_syncdata(_s, _h, auth_token);
+		psylbm_handle_syncdata(server, host, &recv_mess);
 		break;
 	}
 
 	return 0;
 
 error:
-	fprintf(stdout, "Received malformed request [%s]\n", message);
-	psylbm_reply(_s, _h, PSYLBM_BAD_REQUEST);
+	fprintf(stdout, "received malformed request [%s]\n", message);
+	psylbm_reply(server, host, PSYLBM_BAD_REQUEST);
 	return -1;
 }
 
 /* provided a username and password generate a token, and send it back */
-int psylbm_handle_authorization(struct psylbm_server *_s, struct remote_host *_h,
-				char *_username, char *_password)
+int psylbm_handle_authorization(struct psylbm_server *server, struct remote_host *host,
+				struct received_message *mess)
 {
 	char *hash = NULL;
 	int salt;
-	user_t *u = psylbm_find_user_by_name(_s->db, _username);
+	struct user *usr = psylbm_find_user_by_name(server->db, mess->message.auth.username);
 
-	if (u == NULL) {
+	if (usr == NULL) {
 		/* No user found - send back fail message */
-		_psylbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
+		psylbm_reply(server, host, PSYLBM_AUTH_FAIL);
 		return 1;
 	}
 
-	salt = atoi(u->salt);
-	hash = _psylbm_hash_password(_password, salt);
+	salt = atoi(usr->salt);
+	hash = psylbm_hash_password(mess->message.auth.password, salt);
 
-	if (!strcmp(hash, u->password)) {
-		char *token = _psylbm_generate_token();
-		psylbm_handle_token(_s, _h, u->id, token);
-		printf("Authenticate [%s]-[%s]\n", u->name, token);
+	if (!strcmp(hash, usr->password)) {
+		char *token = psylbm_generate_token();
+		psylbm_handle_token(server, host, usr->id, token);
+
+		// TODO: remove when done testing
+		printf("authenticate [%s]-[%s]\n", usr->name, token);
 		free(token);
 	} else {
-		/* TODO Log me */
-		printf("Failed login attempt [%s]\n", u->name);
-		_psylbm_reply(_s, _h, PSYLBM_AUTH_FAIL);
+		printf("failed login attempt [%s]\n", usr->name);
+		psylbm_reply(server, host, PSYLBM_AUTH_FAIL);
 	}
 
 	free(hash);
-	psylbm_free_user(u);
+	psylbm_free_user(usr);
 
 	return 0;
 }
@@ -101,41 +97,48 @@ int psylbm_handle_authorization(struct psylbm_server *_s, struct remote_host *_h
  * new record is created.
  */
 int psylbm_handle_insert(struct psylbm_server *server, struct remote_host *host,
-			 char *_name, char *_title, uint32_t _vol,
-			 uint32_t _chapter, uint32_t _page, char *token,
-			 uint32_t _bookmark_id)
+			 struct received_message *mess)
 {
 	int ret = 0;
 	uint8_t error = 0;
-	uint32_t uid = psylbm_find_user_id_by_token(server->db, token, &error);
-	bookmark_t *bm = NULL;
+	struct bookmark *bm = NULL;
 
-	/* No such user */
+	const uint32_t user_id =
+		psylbm_find_user_id_by_token(server->db,
+					     &mess->message.insert.token[0],
+					     &error);
+
 	if (error) {
+		/* No such user */
 		psylbm_reply(server, host, PSYLBM_BAD_REQUEST);
 		return -1;
 	}
+	mess->message.insert.user_id = user_id;
 
-	if (_bookmark_id == 0)
-		/* No id given - Does the previous bookmark exist? */
-		bm = psylbm_find_bookmark_by_name(server->db, _name);
+	// TODO: should refactor this
+	// No id given - Does the previous bookmark exist?
+	if (mess->message.insert.book_id == 0)
+		bm = psylbm_find_bookmark_by_name(server->db,
+						  mess->message.insert.name);
 	else
-		bm = psylbm_find_bookmark(server->db, _bookmark_id);
+		bm = psylbm_find_bookmark(server->db, mess->message.insert.book_id);
 
 	if (bm == NULL) {
-		/* No such bookmark - inset */
-		ret = psylbm_insert_bookmark(
-			server->db, uid, _name, _title, _vol, _chapter, _page);
-		bm = psylbm_find_bookmark_by_name(server->db, _name);
+		/* No such bookmark - insert */
+		ret = psylbm_insert_bookmark(server->db, mess);
+
+		bm = psylbm_find_bookmark_by_name(server->db,
+						  mess->message.insert.name);
 	} else {
 		/* Found bookmark - update */
-		ret = psylbm_update_bookmark(
-			server->db, _name, _title, _vol, _chapter, _page, _bookmark_id);
+		ret = psylbm_update_bookmark(server->db, mess);
 	}
 
 	if (!ret) {
+		// TODO: refactor to something cleaner
 		char reply[128] = { 0 };
 		char idstr[64];
+
 		sprintf(idstr, "%d", bm->id);
 		strcpy(reply, PSYLBM_INS_OK);
 		strcat(reply, idstr);
@@ -166,7 +169,7 @@ int psylbm_handle_delete(struct psylbm_server *server, struct remote_host *host,
 		/* Authorization ok */
 		printf("Deleting...\n");
 
-		if (psylbm_delete_bookmark(server->db, book_id) == 0)
+		if (psylbm_delete_bookmark(server->db, recv_mess->message.delete.bookmark_id) == 0)
 			psylbm_reply(server, host, PSYLBM_DEL_OK);
 		else
 			psylbm_reply(server, host, PSYLBM_DEL_FAIL);
@@ -200,7 +203,7 @@ int psylbm_handle_register(struct psylbm_server *server, struct remote_host *hos
 	if (ret == -1) {
 		psylbm_reply(server, host, PSYLBM_SERVER_ERROR);
 	} else if (ret == -2) {
-		_psylbm_reply(server, host, PSYLBM_USERNAME_TAKEN);
+		psylbm_reply(server, host, PSYLBM_USERNAME_TAKEN);
 		printf("--| Username [%s] has been taken.\n", user); /* TODO: logme */
 	} else {
 	}
@@ -330,7 +333,7 @@ int psylbm_handle_syncdata(struct psylbm_server *server, struct remote_host *hos
 		sprintf(reply, "%d|%s|%s|%d|%d|%d",
 			book->id, book->name, book->title, book->volume,
 			book->chapter, book->page);
-		_psylbm_reply(server, host, reply);
+		psylbm_reply(server, host, reply);
 	}
 
 	/* Since we're not dupping in this case, above */
