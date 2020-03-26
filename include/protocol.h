@@ -27,7 +27,8 @@ struct insert_message {
 	uint32_t page;
 	uint32_t book_id;
 
-	uint8_t  type;
+	uint8_t  type; // TODO: is this used?
+	uint32_t user_id;
 };
 
 struct register_message {

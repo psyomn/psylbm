@@ -5,14 +5,14 @@
 #include <db_user.h>
 #include <db_token.h>
 
-user_t *psy_lbm_find_user(sqlite3 *_db, uint32_t _id)
+struct user *psylbm_find_user(sqlite3 *_db, uint32_t _id)
 {
 	sqlite3_stmt *stmt = NULL;
-	user_t *u = NULL;
+	struct user *u = NULL;
 	const char **t = NULL;
 	int rc;
 
-	u = psy_lbm_make_user();
+	u = psylbm_make_user();
 
 	sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_ID,
 			   sizeof(SQL_FIND_USER_BY_ID), &stmt, t);
@@ -39,7 +39,7 @@ user_t *psy_lbm_find_user(sqlite3 *_db, uint32_t _id)
 		u->password = converted_password;
 		u->salt = converted_salt;
 	} else {
-		psy_lbm_free_user(u);
+		psylbm_free_user(u);
 		u = NULL;
 	}
 
@@ -48,14 +48,14 @@ user_t *psy_lbm_find_user(sqlite3 *_db, uint32_t _id)
 }
 
 /* Look for a user. Null if not found */
-user_t *psy_lbm_find_user_by_name(sqlite3 *_db, char *_name)
+struct user *psylbm_find_user_by_name(sqlite3 *_db, const char *_name)
 {
 	sqlite3_stmt *stmt = NULL;
-	user_t *u = NULL;
+	struct user *u = NULL;
 	const char **t = NULL;
 	int rc;
 
-	u = psy_lbm_make_user();
+	u = psylbm_make_user();
 
 	sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_NAME,
 			   sizeof(SQL_FIND_USER_BY_NAME), &stmt, t);
@@ -84,7 +84,7 @@ user_t *psy_lbm_find_user_by_name(sqlite3 *_db, char *_name)
 		u->password = converted_password;
 		u->salt = converted_salt;
 	} else {
-		psy_lbm_free_user(u);
+		psylbm_free_user(u);
 		u = NULL;
 	}
 
@@ -93,28 +93,27 @@ user_t *psy_lbm_find_user_by_name(sqlite3 *_db, char *_name)
 	return u;
 }
 
-int psy_lbm_insert_user(sqlite3 *_db, char *_username, char *_password)
+int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 	char *hashed_password = NULL;
-	user_t *u = NULL;
+	struct user *u = NULL;
 	int salt = time(0);
 	char salt_str[11];
 
-	/* Before anything, make sure that the user doesn't exist */
-	if (_psy_lbm_user_exists(_db, _username)) return -2;
+	if (psylbm_user_exists(db, username)) return -2;
 
 	sprintf(salt_str, "%d", salt);
-	hashed_password = _psy_lbm_hash_password(_password, salt);
+	hashed_password = psylbm_hash_password(password, salt);
 
-	sqlite3_prepare_v2(_db, SQL_INSERT_USER,
+	sqlite3_prepare_v2(db, SQL_INSERT_USER,
 			   sizeof(SQL_INSERT_USER), &stmt, t);
 
 	sqlite3_bind_text(stmt,
 			  1,
-			  _username,
-			  strlen(_username),
+			  username,
+			  strlen(username),
 			  SQLITE_STATIC);
 	sqlite3_bind_text(stmt,
 			  2,
@@ -143,22 +142,22 @@ int psy_lbm_insert_user(sqlite3 *_db, char *_username, char *_password)
 	 * update/set the api token, we just run an update
 	 */
 
-	u = psy_lbm_find_user_by_name(_db, _username);
-	psy_lbm_make_token(_db, u->id, "new");
-	psy_lbm_free_user(u);
+	u = psylbm_find_user_by_name(db, username);
+	psylbm_make_token(db, u->id, "new");
+	psylbm_free_user(u);
 
 	return 0;
 }
 
-/** Search user by name. return 0 on not found, else 1 */
-int _psy_lbm_user_exists(sqlite3 *_db, char *_name)
+int psylbm_user_exists(sqlite3 *db, const char *name)
 {
 	int ret;
-	user_t *u = NULL;
+	struct user *usr = NULL;
 
-	u = psy_lbm_find_user_by_name(_db, _name);
-	ret = (u == NULL ? 0 : 1);
-	psy_lbm_free_user(u);
+	usr = psylbm_find_user_by_name(db, name);
+	ret = !(usr == NULL);
+
+	psylbm_free_user(usr);
 
 	return ret;
 }
@@ -167,20 +166,21 @@ int _psy_lbm_user_exists(sqlite3 *_db, char *_name)
  * Thanks to Adam Lamers
  *   http://stackoverflow.com/questions/2262386/
  */
-char *_psy_lbm_hash_password(char *_pass, int _salt)
+char *psylbm_hash_password(const char *pass, int salt)
 {
 	unsigned char hashed_pass[SHA256_DIGEST_LENGTH];
 	char *ret_string = malloc(SHA256_DIGEST_LENGTH * 2 + 1);
 
+	char string[50 + 10 + 1] = { 0 };
+
 	/* 10 is since epoch bytes for salt */
-	char string[PSYLBM_PASSWORD_LENGTH + 10 + 1];
-	char since_epoch[11];
+	char since_epoch[11] = { 0 };
 	int i = 0;
 
 	/* Build salted string */
 	memset(string, 0, sizeof(string));
-	sprintf(since_epoch, "%d", _salt);
-	strcpy(string, _pass);
+	sprintf(since_epoch, "%d", salt);
+	strcpy(string, pass);
 	strcat(string, since_epoch);
 
 	/* And get the hashed value */

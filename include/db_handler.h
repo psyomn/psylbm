@@ -8,5 +8,5 @@
 
 #define PSYLBM_DB_NAME "psylbm-db.sqlite3"
 
-void psy_lbm_check_db(void);
-void psy_lbm_make_db(void);
+void psylbm_check_db(void);
+void psylbm_make_db(void);
