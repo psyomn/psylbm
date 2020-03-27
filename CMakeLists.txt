@@ -36,7 +36,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffloat-store -fno-common")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
-
 set(CMAKE_C_FLAGS_DEBUG "-g ${CMAKE_C_FLAGS}")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS}")
 
@@ -95,3 +94,4 @@ endfunction(psylbm_add_test)
 
 psylbm_add_test(protocol_test)
 psylbm_add_test(common_test)
+psylbm_add_test(domain_test)
