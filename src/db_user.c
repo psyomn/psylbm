@@ -48,24 +48,22 @@ struct user *psylbm_find_user(sqlite3 *_db, uint32_t _id)
 }
 
 /* Look for a user. Null if not found */
-struct user *psylbm_find_user_by_name(sqlite3 *_db, const char *_name)
+struct user *psylbm_find_user_by_name(sqlite3 *db, const char *name)
 {
 	sqlite3_stmt *stmt = NULL;
-	struct user *u = NULL;
+	struct user *user = NULL;
 	const char **t = NULL;
 	int rc;
 
-	u = psylbm_make_user();
+	user = psylbm_make_user();
 
-	sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_NAME,
+	sqlite3_prepare_v2(db, SQL_FIND_USER_BY_NAME,
 			   sizeof(SQL_FIND_USER_BY_NAME), &stmt, t);
 
-	sqlite3_bind_text(stmt, 1, _name, strlen(_name), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, name, strlen(name), SQLITE_STATIC);
 
 	rc = sqlite3_step(stmt);
 
-	/* We only want the first occurence, and duplicate usernames should not exist
-	 * due to the unique restriction */
 	if (rc == SQLITE_ROW) {
 		const unsigned char *bookmark_name_uc = sqlite3_column_text(stmt, 1);
 		const int bookmark_name_uc_size = sqlite3_column_bytes(stmt, 1);
@@ -79,18 +77,18 @@ struct user *psylbm_find_user_by_name(sqlite3 *_db, const char *_name)
 		const int salt_uc_size = sqlite3_column_bytes(stmt, 3);
 		char *converted_salt = psylbm_strndup(salt_uc, salt_uc_size);
 
-		u->id = sqlite3_column_int(stmt, 0);
-		u->name = converted_bookmark_name;
-		u->password = converted_password;
-		u->salt = converted_salt;
+		user->id = sqlite3_column_int(stmt, 0);
+		user->name = converted_bookmark_name;
+		user->password = converted_password;
+		user->salt = converted_salt;
 	} else {
-		psylbm_free_user(u);
-		u = NULL;
+		psylbm_free_user(user);
+		user = NULL;
 	}
 
 	sqlite3_finalize(stmt);
 
-	return u;
+	return user;
 }
 
 int psylbm_insert_user(sqlite3 *db, const char *username, const char *password)
