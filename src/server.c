@@ -14,13 +14,13 @@ static const struct psylbm_status_strings psylbm_statuses[] = {
 	{ PSYLBM_PANIC,     "panic"        }
 };
 
-struct psylbm_server *psylbm_make_server(uint16_t _portnum, const char *_host)
+struct psylbm_server *psylbm_make_server(uint16_t portnum, const char *host)
 {
 	struct psylbm_server *server = calloc(1, sizeof(struct psylbm_server));
 
-	strncpy(server->hostname, _host, sizeof(server->hostname) - 1);
+	strncpy(server->hostname, host, sizeof(server->hostname) - 1);
 
-	server->portnum = _portnum;
+	server->portnum = portnum;
 	server->status = PSYLBM_STARTED;
 	return server;
 }

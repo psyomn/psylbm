@@ -5,7 +5,7 @@
 #include "db_user.h"
 #include "db_token.h"
 
-struct user *psylbm_find_user(sqlite3 *_db, uint32_t _id)
+struct user *psylbm_find_user(sqlite3 *db, uint32_t id)
 {
 	sqlite3_stmt *stmt = NULL;
 	struct user *u = NULL;
@@ -14,10 +14,10 @@ struct user *psylbm_find_user(sqlite3 *_db, uint32_t _id)
 
 	u = psylbm_make_user();
 
-	sqlite3_prepare_v2(_db, SQL_FIND_USER_BY_ID,
+	sqlite3_prepare_v2(db, SQL_FIND_USER_BY_ID,
 			   sizeof(SQL_FIND_USER_BY_ID), &stmt, t);
 
-	sqlite3_bind_int(stmt, 1, _id);
+	sqlite3_bind_int(stmt, 1, id);
 
 	rc = sqlite3_step(stmt);
 
