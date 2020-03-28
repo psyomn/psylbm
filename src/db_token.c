@@ -3,17 +3,17 @@
 #include "domain.h"
 
 /** This should only be called once, from user creation */
-int psylbm_make_token(sqlite3 *_db, uint32_t _user_id, const char *_token)
+int psylbm_make_token(sqlite3 *db, uint32_t user_id, const char *token)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
-	sqlite3_prepare_v2(_db, SQL_INSERT_API, sizeof(SQL_INSERT_API), &stmt, t);
-	sqlite3_bind_int(stmt, 1, _user_id);
-	sqlite3_bind_text(stmt, 2, _token, strlen(_token), SQLITE_STATIC);
+	sqlite3_prepare_v2(db, SQL_INSERT_API, sizeof(SQL_INSERT_API), &stmt, t);
+	sqlite3_bind_int(stmt, 1, user_id);
+	sqlite3_bind_text(stmt, 2, token, strlen(token), SQLITE_STATIC);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
-		perror("Problem inserting api token");
+		perror("problem inserting api token");
 		sqlite3_finalize(stmt);
 		return -1;
 	}
@@ -23,14 +23,14 @@ int psylbm_make_token(sqlite3 *_db, uint32_t _user_id, const char *_token)
 }
 
 /** Update login token */
-int psylbm_set_token(sqlite3 *_db, uint32_t _user_id, char *_token)
+int psylbm_set_token(sqlite3 *db, uint32_t user_id, char *token)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
-	sqlite3_prepare_v2(_db, SQL_UPDATE_TOKEN, sizeof(SQL_UPDATE_TOKEN), &stmt, t);
-	sqlite3_bind_text(stmt, 1, _token, strlen(_token), SQLITE_STATIC);
-	sqlite3_bind_int(stmt, 2, _user_id);
+	sqlite3_prepare_v2(db, SQL_UPDATE_TOKEN, sizeof(SQL_UPDATE_TOKEN), &stmt, t);
+	sqlite3_bind_text(stmt, 1, token, strlen(token), SQLITE_STATIC);
+	sqlite3_bind_int(stmt, 2, user_id);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
 		perror("Problem setting api token");
@@ -43,23 +43,22 @@ int psylbm_set_token(sqlite3 *_db, uint32_t _user_id, char *_token)
 
 char *psylbm_generate_token(void)
 {
-	int buffsize = 128;
-	char rand_data[buffsize];
-	int max = buffsize;
-	int i;
-	unsigned char hashed[SHA256_DIGEST_LENGTH];
-	char *ret_string = malloc(SHA256_DIGEST_LENGTH * 2 + 1);
+	char rand_data[128] = { 0 };
+	unsigned char hashed[SHA256_DIGEST_LENGTH] = { 0 };
 
-	/* Fill in a random string */
-	for (i = 0; i < max; ++i)
-		rand_data[i] = rand() % 0xFF;
+	char *ret_string = calloc(SHA256_DIGEST_LENGTH * 2 + 1, sizeof(char));
+
+	if (!ret_string) return NULL;
+
+	for (size_t i = 0; i < sizeof(rand_data); ++i)
+		rand_data[i] = rand() & 0xff;
 
 	SHA256_CTX sha256;
 	SHA256_Init(&sha256);
-	SHA256_Update(&sha256, rand_data, strlen(rand_data));
+	SHA256_Update(&sha256, rand_data, 128);
 	SHA256_Final(hashed, &sha256);
 
-	for (i = 0; i < SHA256_DIGEST_LENGTH; ++i)
+	for (size_t i = 0; i < SHA256_DIGEST_LENGTH; ++i)
 		sprintf((ret_string + (i * 2)), "%02x", hashed[i]);
 
 	return ret_string;
