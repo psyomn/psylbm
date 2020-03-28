@@ -1,9 +1,9 @@
 #include <openssl/sha.h>
 #include <sqlite3.h>
 
-#include <sql_strings.h>
-#include <db_user.h>
-#include <db_token.h>
+#include "sql_strings.h"
+#include "db_user.h"
+#include "db_token.h"
 
 struct user *psylbm_find_user(sqlite3 *_db, uint32_t _id)
 {

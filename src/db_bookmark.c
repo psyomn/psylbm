@@ -1,5 +1,4 @@
 #include "protocol.h"
-
 #include "db_bookmark.h"
 #include "sql_strings.h"
 
@@ -77,16 +76,16 @@ int psylbm_update_bookmark(sqlite3 *db, struct received_message *mess)
 	return ret;
 }
 
-struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *_db, char *_name)
+struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *db, char *name)
 {
 	struct bookmark *book = NULL;
 	const char **t = NULL;
 	sqlite3_stmt *stmt = NULL;
 
-	sqlite3_prepare_v2(_db, SQL_FIND_BOOKMARK_BY_NAME,
+	sqlite3_prepare_v2(db, SQL_FIND_BOOKMARK_BY_NAME,
 			   sizeof(SQL_FIND_BOOKMARK_BY_NAME), &stmt, t);
 
-	sqlite3_bind_text(stmt, 1, _name, strlen(_name), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, name, strlen(name), SQLITE_STATIC);
 
 	if (sqlite3_step(stmt) != SQLITE_ROW)
 		return NULL;
@@ -114,17 +113,17 @@ struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *_db, char *_name)
 	return book;
 }
 
-int psylbm_delete_bookmark(sqlite3 *_db, uint32_t _book_id)
+int psylbm_delete_bookmark(sqlite3 *db, uint32_t book_id)
 {
 	int ret = 0;
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
-	printf("Delete bookmark with id: [%d]\n", _book_id);
-	sqlite3_prepare_v2(_db, SQL_DELETE_BOOKMARK, sizeof(SQL_DELETE_BOOKMARK),
+	printf("delete bookmark with id: [%d]\n", book_id);
+	sqlite3_prepare_v2(db, SQL_DELETE_BOOKMARK, sizeof(SQL_DELETE_BOOKMARK),
 			   &stmt, t);
 
-	sqlite3_bind_int(stmt, 1, _book_id);
+	sqlite3_bind_int(stmt, 1, book_id);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 		ret = -1;
@@ -133,16 +132,16 @@ int psylbm_delete_bookmark(sqlite3 *_db, uint32_t _book_id)
 	return ret;
 }
 
-int psylbm_purge_bookmarks(sqlite3 *_db, uint32_t _user_id)
+int psylbm_purge_bookmarks(sqlite3 *db, uint32_t user_id)
 {
 	int ret = 0;
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
-	sqlite3_prepare_v2(_db, SQL_PURGE_BOOKMARKS, sizeof(SQL_PURGE_BOOKMARKS),
+	sqlite3_prepare_v2(db, SQL_PURGE_BOOKMARKS, sizeof(SQL_PURGE_BOOKMARKS),
 			   &stmt, t);
 
-	sqlite3_bind_int(stmt, 1, _user_id);
+	sqlite3_bind_int(stmt, 1, user_id);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 		ret = -1;
@@ -151,19 +150,19 @@ int psylbm_purge_bookmarks(sqlite3 *_db, uint32_t _user_id)
 	return ret;
 }
 
-struct bookmark *psylbm_find_bookmark(sqlite3 *_db, uint32_t _bm_id)
+struct bookmark *psylbm_find_bookmark(sqlite3 *db, uint32_t bookmark_id)
 {
 	struct bookmark *book = NULL;
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
 
-	sqlite3_prepare_v2(_db, SQL_FIND_BOOKMARK,
+	sqlite3_prepare_v2(db, SQL_FIND_BOOKMARK,
 			   sizeof(SQL_FIND_BOOKMARK), &stmt, t);
 
-	sqlite3_bind_int(stmt, 1, _bm_id);
+	sqlite3_bind_int(stmt, 1, bookmark_id);
 
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
-		printf("Did not find bookmark with id [%d]\n", _bm_id);
+		printf("did not find bookmark with id [%d]\n", bookmark_id);
 		return NULL;
 	}
 
