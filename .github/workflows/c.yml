@@ -31,7 +31,7 @@ jobs:
     - name: test
       working-directory: ./build
       run: |
-        make test
+        CTEST_OUTPUT_ON_FAILURE=1 make test
     - name: lint
       working-directory: ./build
       run: make check-format
