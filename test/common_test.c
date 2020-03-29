@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-static int psylbm_strndup_test(void)
+static int strndup_test(void)
 {
 	const unsigned char src[] = { 1, 2, 3, 4 };
 
@@ -24,6 +24,5 @@ static int psylbm_strndup_test(void)
 
 int main(void)
 {
-	return
-		psylbm_strndup_test();
+	return strndup_test();
 }

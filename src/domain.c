@@ -1,9 +1,9 @@
-#include <domain.h>
-#include <common.h>
+#include "domain.h"
+#include "common.h"
 
 struct user *psylbm_make_user(void)
 {
-	return calloc(0, sizeof(struct user));
+	return calloc(1, sizeof(struct user));
 }
 
 void psylbm_free_user(struct user *user)
@@ -18,7 +18,7 @@ void psylbm_free_user(struct user *user)
 
 struct bookmark *psylbm_make_bookmark(void)
 {
-	return calloc(0, sizeof(struct bookmark));
+	return calloc(1, sizeof(struct bookmark));
 }
 
 void psylbm_free_bookmark(struct bookmark *bookmark)

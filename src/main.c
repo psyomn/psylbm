@@ -5,7 +5,7 @@
 void init(void)
 {
 	srand(time(NULL));
-	psylbm_check_db();
+	psylbm_check_db(PSYLBM_DB_NAME);
 }
 
 int main(int argc, char *argv[])
