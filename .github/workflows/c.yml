@@ -13,25 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
-    - name: setup deps
+    - name: docker
       run: |
-        sudo apt-get update
-        sudo apt-get install gcc cmake libsqlite3-dev uncrustify valgrind
-    - name: isolate build
-      run: mkdir build
-    - name: generate build environment
-      working-directory: ./build
-      run: |
-        cmake ..
-    - name: make the project
-      working-directory: ./build
-      run: |
-        make
-    - name: test
-      working-directory: ./build
-      run: |
-        CTEST_OUTPUT_ON_FAILURE=1 make test
-    - name: lint
-      working-directory: ./build
-      run: make check-format
+        docker image build -t psylbm:test .
