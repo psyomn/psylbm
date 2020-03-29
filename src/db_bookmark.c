@@ -39,17 +39,10 @@ int psylbm_insert_bookmark(sqlite3 *db, struct received_message *recv_mess)
 int psylbm_update_bookmark(sqlite3 *db, struct received_message *mess)
 {
 	int ret = 0;
-	struct bookmark *bm = NULL;
 	sqlite3_stmt *stmt = NULL;
-	const char **t = NULL;
-
-	if (mess->message.insert.book_id == 0)
-		bm = psylbm_find_bookmark_by_name(db, &mess->message.insert.name[0]);
-	else
-		bm = psylbm_find_bookmark(db, mess->message.insert.book_id);
 
 	sqlite3_prepare_v2(db, SQL_UPDATE_BOOKMARK_VALUES,
-			   sizeof(SQL_UPDATE_BOOKMARK_VALUES), &stmt, t);
+			   sizeof(SQL_UPDATE_BOOKMARK_VALUES), &stmt, 0);
 
 	sqlite3_bind_text(stmt, 1,
 			  mess->message.insert.name,
@@ -64,19 +57,19 @@ int psylbm_update_bookmark(sqlite3 *db, struct received_message *mess)
 	sqlite3_bind_int(stmt, 3, mess->message.insert.volume);
 	sqlite3_bind_int(stmt, 4, mess->message.insert.chapter);
 	sqlite3_bind_int(stmt, 5, mess->message.insert.page);
-	sqlite3_bind_int(stmt, 6, bm->id);
+	sqlite3_bind_int(stmt, 6, mess->message.insert.book_id);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
 		printf("error updating bookmark\n");
 		ret = -1;
 	}
 
-	psylbm_free_bookmark(bm);
 	sqlite3_finalize(stmt);
+
 	return ret;
 }
 
-struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *db, char *name)
+struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *db, const char *name)
 {
 	struct bookmark *book = NULL;
 	const char **t = NULL;
@@ -87,8 +80,10 @@ struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *db, char *name)
 
 	sqlite3_bind_text(stmt, 1, name, strlen(name), SQLITE_STATIC);
 
-	if (sqlite3_step(stmt) != SQLITE_ROW)
-		return NULL;
+	if (sqlite3_step(stmt) != SQLITE_ROW) {
+		printf("could not find bookmark with name: %s", name); // TODO use logger here
+		goto cleanup;
+	}
 
 	// TODO: Fix utf strings
 	const unsigned char *bookmark_name_uc = sqlite3_column_text(stmt, 2);
@@ -108,8 +103,8 @@ struct bookmark *psylbm_find_bookmark_by_name(sqlite3 *db, char *name)
 	book->chapter = sqlite3_column_int(stmt, 5);
 	book->page = sqlite3_column_int(stmt, 6);
 
+cleanup:
 	sqlite3_finalize(stmt);
-
 	return book;
 }
 
@@ -154,16 +149,15 @@ struct bookmark *psylbm_find_bookmark(sqlite3 *db, uint32_t bookmark_id)
 {
 	struct bookmark *book = NULL;
 	sqlite3_stmt *stmt = NULL;
-	const char **t = NULL;
 
 	sqlite3_prepare_v2(db, SQL_FIND_BOOKMARK,
-			   sizeof(SQL_FIND_BOOKMARK), &stmt, t);
+			   sizeof(SQL_FIND_BOOKMARK), &stmt, 0);
 
 	sqlite3_bind_int(stmt, 1, bookmark_id);
 
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
 		printf("did not find bookmark with id [%d]\n", bookmark_id);
-		return NULL;
+		goto cleanup;
 	}
 
 	// TODO: Fix utf strings
@@ -184,8 +178,8 @@ struct bookmark *psylbm_find_bookmark(sqlite3 *db, uint32_t bookmark_id)
 	book->chapter = sqlite3_column_int(stmt, 5);
 	book->page = sqlite3_column_int(stmt, 6);
 
+cleanup:
 	sqlite3_finalize(stmt);
-
 	return book;
 }
 
