@@ -59,10 +59,11 @@ set(psylbm_SOURCES
   src/common.c
   src/protocol.c)
 
-set(PSYLBM_EXECUTABLE_NAME "psylbm-server")
-set(PSYLBM_LINK_LIBS psylbm ${SQLITE3_LIBRARY} ${OPENSSL_LIBRARIES})
+set(PSYLBM_EXECUTABLE_NAME "psylbm")
+set(PSYLBM_LINK_LIBS psylbm_shared ${SQLITE3_LIBRARY} ${OPENSSL_LIBRARIES})
 
-add_library(psylbm SHARED ${psylbm_SOURCES})
+add_library(psylbm_shared SHARED ${psylbm_SOURCES})
+add_library(psylbm_static STATIC ${psylbm_SOURCES})
 add_executable(${PSYLBM_EXECUTABLE_NAME} src/main.c)
 target_link_libraries(${PSYLBM_EXECUTABLE_NAME} ${PSYLBM_LINK_LIBS})
 

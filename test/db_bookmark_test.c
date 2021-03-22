@@ -106,12 +106,12 @@ static int update_bookmark_test(sqlite3 *db)
 
 	assert(psylbm_update_bookmark(db, &mess) == 0);
 
-	{ // should not exist with old name
+	{       // should not exist with old name
 		struct bookmark *bm = psylbm_find_bookmark_by_name(db, bookmark_name);
 		assert(bm == NULL);
 	}
 
-	{ // should exist with new name
+	{       // should exist with new name
 		struct bookmark *bm = psylbm_find_bookmark_by_name(db, new_name);
 		assert(bm);
 
