@@ -27,6 +27,22 @@ And similarly for release:
 
 Simon (psyomn) Symeonidis (2014)
 
+# plans of improvement
+
+I wrote the original version of this repo a long time ago, and over
+the course of a few caffeine addled days. This repo is far from
+perfect but I had a toy project in mind I wanted to write down for
+fun. Here's an incomplete list of considerations that I've been
+meaning to do but never got around to:
+
+- get rid of the silly text protocol, and use more interesting
+  encoding
+- originally an academic/educational project, so the
+  authentication/authorization aspect is superfluous. It will make
+  more sense to scrap all that, and bind the service to `127.0.0.1`.
+- daemonize service in userspace with easy to setup scripts(?)
+- clean up a lot of code (I don't write C like this anymore :P)
+
 # license
 
 GPLv3.
