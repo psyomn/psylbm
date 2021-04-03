@@ -23,7 +23,7 @@ int psylbm_make_token(sqlite3 *db, uint32_t user_id, const char *token)
 }
 
 /** Update login token */
-int psylbm_set_token(sqlite3 *db, uint32_t user_id, char *token)
+int psylbm_set_token(sqlite3 *db, const uint32_t user_id, const char *token)
 {
 	sqlite3_stmt *stmt = NULL;
 	const char **t = NULL;
@@ -34,7 +34,7 @@ int psylbm_set_token(sqlite3 *db, uint32_t user_id, char *token)
 
 	if (sqlite3_step(stmt) != SQLITE_DONE) {
 		perror("Problem setting api token");
-		return -1;
+		return 1;
 	}
 
 	sqlite3_finalize(stmt);
@@ -54,6 +54,7 @@ char *psylbm_generate_token(void)
 		rand_data[i] = rand() & 0xff;
 
 	SHA256_CTX sha256;
+
 	SHA256_Init(&sha256);
 	SHA256_Update(&sha256, rand_data, 128);
 	SHA256_Final(hashed, &sha256);
@@ -85,7 +86,7 @@ uint32_t psylbm_find_user_id_by_token(sqlite3 *db, const char *token, uint8_t *e
 	}
 
 	sqlite3_finalize(stmt);
-	perror("Problem finding user by id");
+	perror("problem finding user by id");
 	*error = 1;
 
 	return 0;
