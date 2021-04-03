@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.20)
 project(psylbm C)
 
 enable_testing()
@@ -7,37 +7,37 @@ enable_testing()
 
 set(CMAKE_MODULE_PATH "${psylbm_SOURCE_DIR}/modules" ${CMAKE_MODULE_PATH})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wwrite-strings")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunreachable-code")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-strict-aliasing")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-format-nonliteral")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -g -O3 -Werror")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-braces -Wextra")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-missing-field-initializers -Wformat=2")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wswitch-default -Wswitch-enum")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align -Wpointer-arith")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wbad-function-cast -Wstrict-overflow=5")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes -Winline")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wundef -Wnested-externs -Wcast-qual")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow -Wunreachable-code")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wlogical-op -Wfloat-equal")
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wall)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wcast-align)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wwrite-strings)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wunreachable-code)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wno-strict-aliasing)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wno-format-nonliteral)
+set(BUILD_FLAGS ${BUILD_FLAGS} -pipe -Werror)
+set(BUILD_FLAGS ${BUILD_FLAGS} -march=native)
+set(BUILD_FLAGS ${BUILD_FLAGS} -pedantic -Wall)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wno-missing-braces -Wextra)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wno-missing-field-initializers -Wformat=2)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wswitch-default -Wswitch-enum)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wcast-align -Wpointer-arith)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wbad-function-cast -Wstrict-overflow=5)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wstrict-prototypes -Winline)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wundef -Wnested-externs -Wcast-qual)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wshadow -Wunreachable-code)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wlogical-op -Wfloat-equal)
 # TODO:
 #  will be nice to re-enable this. This will break due to the way
 #  sockets are handled right now. Some suggest to use bsd sockets to
 #  avoid this problem. Will have to revisit.
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-aliasing=2"
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wredundant-decls")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wold-style-definition -Werror")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb3")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffloat-store -fno-common")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
-set(CMAKE_C_FLAGS_DEBUG "-g ${CMAKE_C_FLAGS}")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS}")
+# set(BUILD_FLAGS ${BUILD_FLAGS} -Wstrict-aliasing=2)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wredundant-decls)
+set(BUILD_FLAGS ${BUILD_FLAGS} -Wold-style-definition -Werror)
+set(BUILD_FLAGS ${BUILD_FLAGS} -ggdb3)
+set(BUILD_FLAGS ${BUILD_FLAGS} -fno-omit-frame-pointer)
+set(BUILD_FLAGS ${BUILD_FLAGS} -ffloat-store -fno-common)
+set(BUILD_FLAGS ${BUILD_FLAGS} -fstrict-aliasing)
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 ${CMAKE_C_FLAGS}")
+set(CMAKE_C_FLAGS_RELEASE "-g -O2 ${CMAKE_C_FLAGS}")
 
 ## Dependencies
 
@@ -64,7 +64,11 @@ set(PSYLBM_LINK_LIBS psylbm_shared ${SQLITE3_LIBRARY} ${OPENSSL_LIBRARIES})
 
 add_library(psylbm_shared SHARED ${psylbm_SOURCES})
 add_library(psylbm_static STATIC ${psylbm_SOURCES})
+target_compile_options(psylbm_shared PRIVATE ${BUILD_FLAGS})
+target_compile_options(psylbm_static PRIVATE ${BUILD_FLAGS})
+
 add_executable(${PSYLBM_EXECUTABLE_NAME} src/main.c)
+target_compile_options(${PSYLBM_EXECUTABLE_NAME} PRIVATE ${BUILD_FLAGS})
 target_link_libraries(${PSYLBM_EXECUTABLE_NAME} ${PSYLBM_LINK_LIBS})
 
 ## Formatting / Linting
@@ -86,6 +90,7 @@ add_custom_target(
 function(psylbm_add_test name)
   add_executable(${name} test/${name}.c)
   target_link_libraries(${name} ${PSYLBM_LINK_LIBS})
+  target_compile_options(${name} PRIVATE ${BUILD_FLAGS})
   add_test(
     NAME    ${name}_valgrind
     COMMAND valgrind --leak-check=full
