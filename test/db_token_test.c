@@ -41,6 +41,5 @@ int main(void)
 
 	return 0
 	       | generate_token_test()
-	       | set_token_test(db)
 	       | free_db(db);
 }
