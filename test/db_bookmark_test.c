@@ -145,6 +145,7 @@ int main(void)
 
 	psylbm_check_db(db_path);
 	sqlite3 *db = NULL;
+
 	if (sqlite3_open(db_path, &db) != SQLITE_OK) {
 		perror("problem opening db");
 		exit(1);

@@ -6,7 +6,7 @@
 
 #include <assert.h>
 
-static const char *db_path = "db_user_test.c.db";
+static const char *db_path = __FILE__ ".db";
 static const char *username = "jonny123";
 static const char *password = "password123";
 
@@ -49,6 +49,7 @@ static int user_exists_test(sqlite3 *db)
 	assert(expect_exists);
 
 	const int expect_not_exist = !psylbm_user_exists(db, "nope");
+
 	assert(expect_not_exist);
 
 	return 0;
@@ -74,6 +75,7 @@ int main(void)
 
 	psylbm_check_db(db_path);
 	sqlite3 *db = NULL;
+
 	if (sqlite3_open(db_path, &db) != SQLITE_OK) {
 		perror("problem opening db");
 		exit(1);

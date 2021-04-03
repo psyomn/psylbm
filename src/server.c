@@ -53,6 +53,7 @@ void psylbm_server_listen(struct psylbm_server *server)
 	struct sockaddr_in remote_address;
 	socklen_t address_length = sizeof(remote_address);
 	struct sockaddr_in server_sock;
+
 	server_sock.sin_family = AF_INET;
 	server_sock.sin_port = htons(server->portnum);
 	server_sock.sin_addr.s_addr = htonl(INADDR_ANY);

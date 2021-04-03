@@ -40,11 +40,14 @@ void print_usage(const char *name)
 
 int main(int argc, char *argv[])
 {
+	init_common();
+
 	int opt = 0;
 
 	while ((opt = getopt(argc, argv, "sc:")) != -1) {
 		switch (opt) {
 		case 's':
+			init_server();
 			run_server();
 			break;
 		case 'c':

@@ -82,10 +82,12 @@ static int parse_auth_message(const char *buffer, struct received_message *messa
 	const char *curr = &buffer[5];
 
 	char *username = &message->message.auth.username[0];
+
 	while (*curr != '|') *(username++) = *(curr++);
 	curr++;
 
 	char *password = &message->message.auth.password[0];
+
 	while (*curr != 0) *(password++) = *(curr++);
 
 	return 0;
@@ -100,6 +102,7 @@ static int parse_register_message(const char *buffer, struct received_message *m
 
 	char *username = &message->message.regist.username[0];
 	size_t count = 0;
+
 	while (*curr != '|') {
 		if (count == max_username_len) break;
 
@@ -109,6 +112,7 @@ static int parse_register_message(const char *buffer, struct received_message *m
 	curr++;
 
 	char *password = &message->message.regist.password[0];
+
 	while (*curr != 0) *(password++) = *(curr++);
 
 	return 0;
@@ -120,10 +124,12 @@ static int parse_delete_message(const char *buffer, struct received_message *mes
 	const char *curr = &buffer[4];
 
 	char *bookmark_id_str = &message->message.delete.bookmark_id_str[0];
+
 	while (*curr != '|') *(bookmark_id_str++) = *(curr++);
 	curr++;
 
 	char *token = &message->message.delete.token[0];
+
 	while (*curr != 0) *(token++) = *(curr++);
 
 	message->message.delete.bookmark_id = atoi(message->message.delete.bookmark_id_str);
@@ -137,6 +143,7 @@ static int parse_purge_message(const char *buffer, struct received_message *mess
 	const char *curr = &buffer[6];
 
 	char *token = &message->message.purge.token[0];
+
 	while (*curr != 0) *(token++) = *(curr++);
 
 	return 0;
@@ -148,6 +155,7 @@ static int parse_sync_message(const char *buffer, struct received_message *messa
 	const char *curr = &buffer[5];
 
 	char *token = &message->message.sync.token[0];
+
 	while (*curr != 0) *(token++) = *(curr++);
 
 	return 0;
@@ -159,6 +167,7 @@ static int parse_syncdata_message(const char *buffer, struct received_message *m
 	const char *curr = &buffer[9];
 
 	char *token = &message->message.syncdata.token[0];
+
 	while (*curr != 0) *(token++) = *(curr++);
 
 	return 0;
@@ -176,6 +185,7 @@ void psylbm_buffer_into_struct(const char *buffer, struct received_message *mess
 		goto error;
 
 	int ret = 0;
+
 	if (strncmp(buffer, "ins", 3) == 0)
 		ret = parse_insert_message(buffer, message);
 	else if (strncmp(buffer, "aut", 3) == 0)

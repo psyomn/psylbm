@@ -217,10 +217,9 @@ int psylbm_handle_token(struct psylbm_server *server, struct remote_host *host,
 	int ret = psylbm_set_token(server->db, user_id, token);
 
 	if (!ret) {
-		psylbm_set_token(server->db, user_id, token);
+		char resp[128] = { 0 };
 
-		char resp[100];
-		memset(resp, 0, sizeof(resp));
+		// TODO strncpy, strncat
 		strcpy(resp, PSYLBM_AUTH);
 		strcat(resp, token);
 		psylbm_reply(server, host, resp);

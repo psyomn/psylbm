@@ -11,6 +11,7 @@ static int strndup_test(void)
 	dst = psylbm_strndup(src, sizeof(src));
 
 	int sum = 0;
+
 	// actual check
 	for (size_t i = 0; i < sizeof(src); ++i)
 		sum |= src[i] ^ dst[i];

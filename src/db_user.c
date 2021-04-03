@@ -183,6 +183,7 @@ char *psylbm_hash_password(const char *pass, int salt)
 
 	/* And get the hashed value */
 	SHA256_CTX sha256;
+
 	SHA256_Init(&sha256);
 	SHA256_Update(&sha256, string, strlen(string));
 	SHA256_Final(hashed_pass, &sha256);
